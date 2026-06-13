@@ -313,7 +313,7 @@ body {
 
 .fixture-card {
   background: rgba(20, 30, 40, 0.85);
-  padding: var(--space-sm) 70px;
+  padding: var(--space-md) 70px;
   border-radius: var(--radius-md);
   box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   border-left: 4px solid var(--flo-green);
@@ -343,9 +343,9 @@ body {
 
 .fixture-meta {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  margin-bottom: var(--space-md);
+  margin-bottom: var(--space-sm);
   gap: var(--space-sm);
 }
 
