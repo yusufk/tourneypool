@@ -2,24 +2,27 @@ import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../components/AuthProvider'
 import { loadPlayerPools, savePlayerPools, loadPoolLeaderboard } from '../api'
 
-const ALL_POOLS = [
-  'Team Alpha', 'Team Beta', 'Team Gamma', 'Team Delta',
-  'Engineering', 'Design', 'Marketing', 'Sales', 'Product', 'Operations',
-  'Squad-Frontend', 'Squad-Backend', 'Squad-Mobile', 'Squad-Platform', 'Squad-Data',
-]
+const DEFAULT_POOLS = ['South Africans', 'Joburgers']
 
 export default function Pools() {
   const { player } = useAuth()
   const [myPools, setMyPools] = useState<string[]>([])
+  const [allPools, setAllPools] = useState<string[]>(DEFAULT_POOLS)
   const [poolBoard, setPoolBoard] = useState<{ name: string; points: number; members: number }[]>([])
   const [poolMembers, setPoolMembers] = useState<Record<string, { name: string; points: number }[]>>({})
   const [saving, setSaving] = useState(false)
+  const [newPool, setNewPool] = useState('')
+  const [error, setError] = useState('')
 
   useEffect(() => {
     if (player) loadPlayerPools(player).then(setMyPools)
     loadPoolLeaderboard().then(data => {
       setPoolBoard(data.leaderboard || [])
       setPoolMembers(data.poolMembers || {})
+      // Merge any pools from the leaderboard into allPools
+      const existing = new Set(DEFAULT_POOLS)
+      for (const p of data.leaderboard || []) existing.add(p.name)
+      setAllPools([...existing])
     })
   }, [player])
 
@@ -32,17 +35,44 @@ export default function Pools() {
     setSaving(false)
   }
 
+  const createPool = async () => {
+    const name = newPool.trim()
+    if (!name) return
+    if (allPools.includes(name)) { setError('Pool already exists'); return }
+    // Count user-created pools (pools not in DEFAULT_POOLS that user is in)
+    const customCount = myPools.filter(p => !DEFAULT_POOLS.includes(p)).length
+    if (customCount >= 3) { setError('Max 3 custom pools'); return }
+    setError('')
+    setAllPools(prev => [...prev, name])
+    const updated = [...myPools, name]
+    setMyPools(updated)
+    setNewPool('')
+    setSaving(true)
+    await savePlayerPools(player!, updated)
+    setSaving(false)
+  }
+
   return (
     <div className="page pools">
       <h1>💀 Pools</h1>
       <p className="subtitle">Join pools to compete as a team {saving && '— saving...'}</p>
 
       <div className="pool-grid">
-        {ALL_POOLS.map(pool => (
+        {allPools.map(pool => (
           <button key={pool} className={`pool-chip ${myPools.includes(pool) ? 'pool-active' : ''}`} onClick={() => toggle(pool)}>
             {myPools.includes(pool) ? '✓ ' : ''}{pool}
           </button>
         ))}
+      </div>
+
+      <div className="create-pool">
+        <h3>Create a Pool</h3>
+        <div className="create-pool-row">
+          <input type="text" placeholder="Pool name" value={newPool} onChange={e => setNewPool(e.target.value)} maxLength={30} onKeyDown={e => e.key === 'Enter' && createPool()} />
+          <button onClick={createPool}>Create</button>
+        </div>
+        {error && <p className="sign-in-error">{error}</p>}
+        <p className="subtitle">Max 3 custom pools per player</p>
       </div>
 
       {myPools.length > 0 && Object.keys(poolMembers).length > 0 && (
@@ -52,9 +82,7 @@ export default function Pools() {
             const members = poolMembers[pool]
             const userIdx = members.findIndex(m => m.name === player)
             const isGoat = userIdx === 0 && members.length > 1
-            return (
-              <PoolTable key={pool} pool={pool} members={members} player={player} userIdx={userIdx} isGoat={isGoat} />
-            )
+            return <PoolTable key={pool} pool={pool} members={members} player={player} userIdx={userIdx} isGoat={isGoat} />
           })}
         </>
       )}

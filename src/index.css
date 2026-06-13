@@ -1160,3 +1160,9 @@ body {
   font-weight: 600;
   cursor: pointer;
 }
+
+.create-pool { margin: 1.5rem 0; padding: 1rem; background: var(--card-bg, rgba(255,255,255,0.05)); border-radius: 12px; }
+.create-pool h3 { margin: 0 0 0.5rem; font-size: 1rem; }
+.create-pool-row { display: flex; gap: 0.5rem; }
+.create-pool-row input { flex: 1; padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: inherit; font-size: 0.9rem; }
+.create-pool-row button { padding: 0.5rem 1rem; border-radius: 8px; background: var(--accent, #4ade80); color: #000; font-weight: 600; border: none; cursor: pointer; }
