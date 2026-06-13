@@ -5,7 +5,7 @@ export default {
 
     // CORS headers
     const origin = request.headers.get('Origin') || ''
-    const allowedOrigins = ['https://yusufk.github.io', 'http://localhost:5173', 'http://localhost:5174']
+    const allowedOrigins = ['https://yusuf.kaka.co.za', 'https://yusufk.github.io', 'http://localhost:5173', 'http://localhost:5174']
     const corsOrigin = allowedOrigins.includes(origin) ? origin : allowedOrigins[0]
     const corsHeaders = {
       'Access-Control-Allow-Origin': corsOrigin,

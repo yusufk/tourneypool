@@ -29,7 +29,7 @@ export default function SignIn() {
   return (
     <div className="sign-in-screen">
       <FloatingEmojis />
-      <h1>FlöBru</h1>
+      <h1>TourneyPool ⚽</h1>
       <h2>World Cup 2026 Predictor</h2>
       <p>Bold predictions. Zero accountability. 🎯</p>
       <div className="sign-in-form">
