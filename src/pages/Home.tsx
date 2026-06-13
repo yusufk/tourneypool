@@ -43,7 +43,7 @@ export default function Home() {
   useEffect(() => {
     loadLeaderboard().then(lb => { if (lb.length) setGoat(lb[0]) })
     loadPoolLeaderboard().then(data => { if (data.leaderboard?.length) setGoatPool(data.leaderboard[0]) })
-    fetch('/api/api/results').then(r => r.ok ? r.json() : {}).then(setResults).catch(() => {})
+    fetch(`${import.meta.env.VITE_API_URL || ''}/api/results`).then(r => r.ok ? r.json() : {}).then(setResults).catch(() => {})
     if (player) loadPredictions(player).then(setPredictions)
   }, [player])
 

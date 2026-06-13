@@ -39,7 +39,7 @@ function formatTime(utc: string): string {
   return d.toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' })
 }
 
-const API_BASE = '/api'
+const API_BASE = import.meta.env.VITE_API_URL || ''
 
 export default function Fixtures() {
   const { player } = useAuth()

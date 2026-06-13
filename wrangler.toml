@@ -11,4 +11,4 @@ crons = ["*/30 * * * *"]
 
 [[kv_namespaces]]
 binding = "TOURNEY_KV"
-id = "YOUR_KV_NAMESPACE_ID"
+id = "567b2376b6fd4b928ed0da8599a31bf5"

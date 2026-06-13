@@ -49,7 +49,7 @@ export default function MatchModal({ match, onClose }: { match: Match; onClose: 
         }
       })
     }
-    fetch('/api/api/results')
+    fetch(`${import.meta.env.VITE_API_URL || ''}/api/results`)
       .then(r => r.ok ? r.json() : {})
       .then((results: Record<string, { homeScore: number; awayScore: number }>) => {
         const r = results[String(match.MatchNumber)]
