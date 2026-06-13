@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useAuth } from './AuthProvider'
-import FloatingEmojis from './FloatingEmojis'
+import GlobeBackground from './GlobeBackground'
 import { register, login } from '../api'
 
 export default function SignIn() {
@@ -28,17 +28,19 @@ export default function SignIn() {
 
   return (
     <div className="sign-in-screen">
-      <FloatingEmojis />
-      <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="TourneyPool" className="sign-in-logo" />
-      <h1>TourneyPool ⚽</h1>
-      <h2>World Cup 2026 Predictor</h2>
-      <p>Bold predictions. Zero accountability. 🎯</p>
-      <div className="sign-in-form">
-        <input type="text" placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} />
-        <input type="password" placeholder="PIN (4+)" value={pin} onChange={(e) => setPin(e.target.value)} maxLength={8} onKeyDown={(e) => e.key === 'Enter' && handleSubmit()} />
-        <button onClick={handleSubmit} disabled={loading}>{loading ? '...' : "Let's Go"}</button>
+      <GlobeBackground />
+      <div className="sign-in-content">
+        <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="TourneyPool" className="sign-in-logo" />
+        <h1>TourneyPool</h1>
+        <h2>FIFA World Cup 2026™ Predictor</h2>
+        <p>Bold predictions. Zero accountability. 🎯</p>
+        <div className="sign-in-form">
+          <input type="text" placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} />
+          <input type="password" placeholder="PIN (4+)" value={pin} onChange={(e) => setPin(e.target.value)} maxLength={8} onKeyDown={(e) => e.key === 'Enter' && handleSubmit()} />
+          <button onClick={handleSubmit} disabled={loading}>{loading ? '...' : "Let's Go"}</button>
+        </div>
+        {error && <p className="sign-in-error">{error}</p>}
       </div>
-      {error && <p className="sign-in-error">{error}</p>}
     </div>
   )
 }

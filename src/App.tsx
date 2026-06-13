@@ -7,7 +7,7 @@ import Predictions from './pages/Predictions'
 import Pools from './pages/Pools'
 import NavBar from './components/NavBar'
 import SignIn from './components/SignIn'
-import FloatingEmojis from './components/FloatingEmojis'
+import GlobeBackground from './components/GlobeBackground'
 
 function AppContent() {
   const { player } = useAuth()
@@ -17,7 +17,7 @@ function AppContent() {
   return (
     <BrowserRouter basename="/tourneypool">
       <div className="app">
-        <FloatingEmojis subtle />
+        <GlobeBackground />
         <NavBar />
         <main className="main-content">
           <Routes>
