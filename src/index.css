@@ -352,7 +352,7 @@ body {
 .fixture-group {
   background: var(--flo-green);
   color: var(--flo-white);
-  padding: 2px 8px;
+  padding: 3px 12px;
   border-radius: var(--radius-full);
   font-size: 11px;
   font-weight: 700;
@@ -1100,9 +1100,10 @@ body {
 
 .pool-chip {
   padding: var(--space-sm) var(--space-md);
-  border: 2px solid var(--flo-gray-200);
+  border: 2px solid rgba(255,255,255,0.2);
   border-radius: var(--radius-full);
-  background: var(--flo-white);
+  background: rgba(20, 30, 40, 0.85);
+  color: var(--flo-white);
   font-size: var(--fs-xs);
   font-weight: 600;
   font-family: 'Montserrat', sans-serif;
@@ -1112,7 +1113,7 @@ body {
 
 .pool-chip:hover {
   border-color: var(--flo-green);
-  background: var(--flo-green-light);
+  background: rgba(0, 160, 73, 0.2);
 }
 
 .pool-chip.pool-active {
@@ -1129,7 +1130,7 @@ body {
 }
 
 .pool-mine td {
-  background: var(--flo-green-light) !important;
+  background: rgba(0, 160, 73, 0.2) !important;
 }
 
 /* Footer */
@@ -1169,7 +1170,7 @@ body {
 .pool-member-table h3 { font-size: var(--fs-sm); color: var(--flo-green); margin-bottom: var(--space-xs); }
 
 .pool-scrollable { max-height: 320px; overflow-y: auto; border-radius: var(--radius-md); }
-.pool-mine td { background: var(--flo-green-light); font-weight: 700; }
+.pool-mine td { background: rgba(0, 160, 73, 0.2); font-weight: 700; }
 
 .save-one-btn {
   margin-top: var(--space-xs);
@@ -1183,8 +1184,8 @@ body {
   cursor: pointer;
 }
 
-.create-pool { margin: 1.5rem 0; padding: 1rem; background: var(--card-bg, rgba(255,255,255,0.05)); border-radius: 12px; }
-.create-pool h3 { margin: 0 0 0.5rem; font-size: 1rem; }
+.create-pool { margin: 1.5rem 0; padding: 1rem; background: rgba(20, 30, 40, 0.85); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); }
+.create-pool h3 { margin: 0 0 0.5rem; font-size: 1rem; color: var(--flo-white); }
 .create-pool-row { display: flex; gap: 0.5rem; }
 .create-pool-row input { flex: 1; padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: inherit; font-size: 0.9rem; }
 .create-pool-row button { padding: 0.5rem 1rem; border-radius: 8px; background: var(--accent, #4ade80); color: #000; font-weight: 600; border: none; cursor: pointer; }
