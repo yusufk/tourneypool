@@ -29,6 +29,7 @@ export default function SignIn() {
   return (
     <div className="sign-in-screen">
       <FloatingEmojis />
+      <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="TourneyPool" className="sign-in-logo" />
       <h1>TourneyPool ⚽</h1>
       <h2>World Cup 2026 Predictor</h2>
       <p>Bold predictions. Zero accountability. 🎯</p>

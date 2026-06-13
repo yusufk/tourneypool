@@ -1166,3 +1166,5 @@ body {
 .create-pool-row { display: flex; gap: 0.5rem; }
 .create-pool-row input { flex: 1; padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: inherit; font-size: 0.9rem; }
 .create-pool-row button { padding: 0.5rem 1rem; border-radius: 8px; background: var(--accent, #4ade80); color: #000; font-weight: 600; border: none; cursor: pointer; }
+
+.sign-in-logo { width: 120px; height: 120px; margin-bottom: 0.5rem; filter: drop-shadow(0 4px 12px rgba(6,182,212,0.3)); }
