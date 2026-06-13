@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import fixtures from '../data/fixtures.json'
 import { getFlagUrl } from '../data/flags'
-import { loadLeaderboard, loadPoolLeaderboard } from '../api'
+import { loadLeaderboard, loadPoolLeaderboard, loadPredictions } from '../api'
+import { useAuth } from '../components/AuthProvider'
 import MatchModal from '../components/MatchModal'
 
 const TAGLINES = [
@@ -32,16 +33,19 @@ function getTodaysMatches() {
 
 export default function Home() {
   const todaysMatches = getTodaysMatches()
+  const { player } = useAuth()
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null)
   const [goat, setGoat] = useState<{ name: string; points: number } | null>(null)
   const [goatPool, setGoatPool] = useState<{ name: string; points: number } | null>(null)
   const [results, setResults] = useState<Record<string, { homeScore: number; awayScore: number }>>({})
+  const [predictions, setPredictions] = useState<Record<string, { homeScore: number; awayScore: number }>>({})
 
   useEffect(() => {
     loadLeaderboard().then(lb => { if (lb.length) setGoat(lb[0]) })
     loadPoolLeaderboard().then(data => { if (data.leaderboard?.length) setGoatPool(data.leaderboard[0]) })
     fetch('/api/api/results').then(r => r.ok ? r.json() : {}).then(setResults).catch(() => {})
-  }, [])
+    if (player) loadPredictions(player).then(setPredictions)
+  }, [player])
 
   return (
     <div className="page home">
@@ -76,6 +80,12 @@ export default function Home() {
                     <span className="team">{m.AwayTeam}</span>
                   </div>
                   <div className="fixture-venue">{m.Location}</div>
+                  {!result && predictions[String(m.MatchNumber)] && (
+                    <span className="pred-badge">✓ {predictions[String(m.MatchNumber)].homeScore} - {predictions[String(m.MatchNumber)].awayScore}</span>
+                  )}
+                  {!result && !predictions[String(m.MatchNumber)] && (
+                    <span className="pred-badge pred-missing">⚠ No prediction</span>
+                  )}
                 </div>
               )
             })}

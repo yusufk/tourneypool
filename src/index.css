@@ -1148,3 +1148,15 @@ body {
 
 .pool-scrollable { max-height: 320px; overflow-y: auto; border-radius: var(--radius-md); }
 .pool-mine td { background: var(--flo-green-light); font-weight: 700; }
+
+.save-one-btn {
+  margin-top: var(--space-xs);
+  padding: var(--space-xs) var(--space-md);
+  background: var(--flo-green);
+  color: var(--flo-white);
+  border: none;
+  border-radius: var(--radius-full);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  cursor: pointer;
+}

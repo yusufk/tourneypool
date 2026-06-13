@@ -42,6 +42,7 @@ export default function Predictions() {
   const [currentRound, setCurrentRound] = useState(rounds[0])
   const [predictions, setPredictions] = useState<Record<number, Prediction>>({})
   const [saving, setSaving] = useState(false)
+  const [dirty, setDirty] = useState<Set<number>>(new Set())
 
   const roundMatches = allMatches.filter((f) => f.RoundNumber === currentRound)
   const roundIdx = rounds.indexOf(currentRound)
@@ -57,6 +58,7 @@ export default function Predictions() {
       ...prev,
       [matchNum]: { ...prev[matchNum], [field]: parseInt(value) || 0 },
     }))
+    setDirty(prev => new Set(prev).add(matchNum))
   }
 
   const handleSave = async () => {
@@ -64,7 +66,16 @@ export default function Predictions() {
     setSaving(true)
     await savePredictions(player, predictions)
     setSaving(false)
+    setDirty(new Set())
     alert(`✅ ${Object.keys(predictions).length} predictions saved!`)
+  }
+
+  const handleSaveOne = async (matchNum: number) => {
+    if (!player || !predictions[matchNum]) return
+    setSaving(true)
+    await savePredictions(player, { [matchNum]: predictions[matchNum] })
+    setSaving(false)
+    setDirty(prev => { const n = new Set(prev); n.delete(matchNum); return n })
   }
 
   const count = Object.keys(predictions).length
@@ -108,6 +119,11 @@ export default function Predictions() {
                 />
                 <span className="team">{m.AwayTeam}</span>
               </div>
+              {dirty.has(m.MatchNumber) && !locked && (
+                <button className="save-one-btn" onClick={() => handleSaveOne(m.MatchNumber)} disabled={saving}>
+                  {saving ? '...' : '✓ Save'}
+                </button>
+              )}
             </div>
           )
         })}
