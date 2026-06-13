@@ -1,0 +1,14 @@
+name = "tourneypool-api"
+main = "worker/index.js"
+compatibility_date = "2024-01-01"
+
+# Set secrets via:
+#   npx wrangler secret put ADMIN_SECRET
+#   npx wrangler secret put FOOTBALL_API_KEY
+
+[triggers]
+crons = ["*/30 * * * *"]
+
+[[kv_namespaces]]
+binding = "TOURNEY_KV"
+id = "YOUR_KV_NAMESPACE_ID"
