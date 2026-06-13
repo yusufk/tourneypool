@@ -313,7 +313,7 @@ body {
 
 .fixture-card {
   background: rgba(20, 30, 40, 0.85);
-  padding: var(--space-md);
+  padding: var(--space-sm) 70px;
   border-radius: var(--radius-md);
   box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   border-left: 4px solid var(--flo-green);
@@ -579,6 +579,7 @@ body {
 .scoring-rules li {
   padding: var(--space-xs) 0;
   font-size: var(--fs-sm);
+  color: rgba(255,255,255,0.9);
 }
 
 /* Responsive */
