@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../components/AuthProvider'
 import { loadPlayerPools, savePlayerPools, loadPoolLeaderboard } from '../api'
 
@@ -48,23 +48,14 @@ export default function Pools() {
       {myPools.length > 0 && Object.keys(poolMembers).length > 0 && (
         <>
           <h2 className="pool-table-title">Your Pool Rankings</h2>
-          {myPools.filter(p => poolMembers[p]).map(pool => (
-            <div key={pool} className="pool-member-table">
-              <h3>{pool}</h3>
-              <table className="leaderboard-table">
-                <thead><tr><th>#</th><th>Player</th><th>Pts</th></tr></thead>
-                <tbody>
-                  {poolMembers[pool].map((m, i) => (
-                    <tr key={m.name} className={m.name === player ? 'pool-mine' : ''}>
-                      <td>{i === 0 ? '🐐' : i + 1}</td>
-                      <td>{m.name}</td>
-                      <td>{m.points}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ))}
+          {myPools.filter(p => poolMembers[p]).map(pool => {
+            const members = poolMembers[pool]
+            const userIdx = members.findIndex(m => m.name === player)
+            const isGoat = userIdx === 0 && members.length > 1
+            return (
+              <PoolTable key={pool} pool={pool} members={members} player={player} userIdx={userIdx} isGoat={isGoat} />
+            )
+          })}
         </>
       )}
 
@@ -89,6 +80,36 @@ export default function Pools() {
           </table>
         </>
       )}
+    </div>
+  )
+}
+
+function PoolTable({ pool, members, player, isGoat }: { pool: string; members: { name: string; points: number }[]; player: string | null; userIdx: number; isGoat: boolean }) {
+  const rowRef = useRef<HTMLTableRowElement>(null)
+  const [showConfetti, setShowConfetti] = useState(false)
+
+  useEffect(() => {
+    if (rowRef.current) rowRef.current.scrollIntoView({ block: 'nearest' })
+    if (isGoat) { setShowConfetti(true); setTimeout(() => setShowConfetti(false), 3000) }
+  }, [isGoat])
+
+  return (
+    <div className="pool-member-table">
+      <h3>{pool} {showConfetti && '🎉🎊🏆'}</h3>
+      <div className={`pool-member-scroll${members.length >= 10 ? ' pool-scrollable' : ''}`}>
+        <table className="leaderboard-table">
+          <thead><tr><th>#</th><th>Player</th><th>Pts</th></tr></thead>
+          <tbody>
+            {members.map((m, i) => (
+              <tr key={m.name} ref={m.name === player ? rowRef : undefined} className={m.name === player ? 'pool-mine' : ''}>
+                <td>{i === 0 ? '🐐' : i + 1}</td>
+                <td>{m.name}</td>
+                <td>{m.points}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }
