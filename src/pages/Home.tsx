@@ -39,7 +39,7 @@ export default function Home() {
 
   useEffect(() => {
     loadLeaderboard().then(lb => { if (lb.length) setGoat(lb[0]) })
-    loadPoolLeaderboard().then(lb => { if (lb.length) setGoatPool(lb[0]) })
+    loadPoolLeaderboard().then(data => { if (data.leaderboard?.length) setGoatPool(data.leaderboard[0]) })
     fetch('/api/api/results').then(r => r.ok ? r.json() : {}).then(setResults).catch(() => {})
   }, [])
 
@@ -47,7 +47,7 @@ export default function Home() {
     <div className="page home">
       <div className="home-hero">
         <h1>TourneyPool</h1>
-        <h2>Tournament Prediction Pool</h2>
+        <h2>World Cup 2026 Predictor</h2>
         <p className="subtitle">{TAGLINES[Math.floor(Math.random() * TAGLINES.length)]}</p>
       </div>
 

@@ -7,7 +7,7 @@ export default function Leaderboard() {
 
   useEffect(() => {
     loadLeaderboard().then(setPlayers)
-    loadPoolLeaderboard().then(setPools)
+    loadPoolLeaderboard().then(data => setPools(data.leaderboard || []))
   }, [])
 
   return (

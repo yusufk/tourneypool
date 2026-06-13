@@ -155,6 +155,7 @@ export default {
       const players = JSON.parse(await env.TOURNEY_KV.get('players') || '[]')
       const results = JSON.parse(await env.TOURNEY_KV.get('results') || '{}')
       const poolScores = {}
+      const poolMembers = {}
 
       for (const player of players) {
         const preds = JSON.parse(await env.TOURNEY_KV.get(`predictions:${player}`) || '{}')
@@ -171,12 +172,19 @@ export default {
           if (!poolScores[pool]) poolScores[pool] = { name: pool, points: 0, members: 0 }
           poolScores[pool].points += points
           poolScores[pool].members += 1
+          if (!poolMembers[pool]) poolMembers[pool] = []
+          poolMembers[pool].push({ name: player, points })
         }
+      }
+
+      // Sort members within each pool
+      for (const pool of Object.keys(poolMembers)) {
+        poolMembers[pool].sort((a, b) => b.points - a.points)
       }
 
       const leaderboard = Object.values(poolScores)
       leaderboard.sort((a, b) => b.points - a.points)
-      return json(leaderboard, 200, corsHeaders)
+      return json({ leaderboard, poolMembers }, 200, corsHeaders)
     }
 
     // POST /api/results (admin - update match results)

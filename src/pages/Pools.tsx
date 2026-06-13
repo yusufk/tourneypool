@@ -12,11 +12,15 @@ export default function Pools() {
   const { player } = useAuth()
   const [myPools, setMyPools] = useState<string[]>([])
   const [poolBoard, setPoolBoard] = useState<{ name: string; points: number; members: number }[]>([])
+  const [poolMembers, setPoolMembers] = useState<Record<string, { name: string; points: number }[]>>({})
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (player) loadPlayerPools(player).then(setMyPools)
-    loadPoolLeaderboard().then(setPoolBoard)
+    loadPoolLeaderboard().then(data => {
+      setPoolBoard(data.leaderboard || [])
+      setPoolMembers(data.poolMembers || {})
+    })
   }, [player])
 
   const toggle = async (pool: string) => {
@@ -40,6 +44,29 @@ export default function Pools() {
           </button>
         ))}
       </div>
+
+      {myPools.length > 0 && Object.keys(poolMembers).length > 0 && (
+        <>
+          <h2 className="pool-table-title">Your Pool Rankings</h2>
+          {myPools.filter(p => poolMembers[p]).map(pool => (
+            <div key={pool} className="pool-member-table">
+              <h3>{pool}</h3>
+              <table className="leaderboard-table">
+                <thead><tr><th>#</th><th>Player</th><th>Pts</th></tr></thead>
+                <tbody>
+                  {poolMembers[pool].map((m, i) => (
+                    <tr key={m.name} className={m.name === player ? 'pool-mine' : ''}>
+                      <td>{i === 0 ? '🐐' : i + 1}</td>
+                      <td>{m.name}</td>
+                      <td>{m.points}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ))}
+        </>
+      )}
 
       {poolBoard.length > 0 && (
         <>

@@ -1142,3 +1142,6 @@ body {
 .app:hover .floating-emojis {
   pointer-events: auto;
 }
+
+.pool-member-table { margin-bottom: var(--space-lg); }
+.pool-member-table h3 { font-size: var(--fs-sm); color: var(--flo-green); margin-bottom: var(--space-xs); }

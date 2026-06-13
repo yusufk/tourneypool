@@ -55,7 +55,7 @@ export async function savePlayerPools(player: string, pools: string[]) {
   return res.json()
 }
 
-export async function loadPoolLeaderboard(): Promise<{ name: string; points: number; members: number }[]> {
+export async function loadPoolLeaderboard(): Promise<{ leaderboard: { name: string; points: number; members: number }[]; poolMembers: Record<string, { name: string; points: number }[]> }> {
   const res = await fetch(`${API_BASE}/api/pool-leaderboard`)
   return res.json()
 }
