@@ -342,13 +342,15 @@ body {
 
 .fixture-meta {
   display: flex;
-  justify-content: center;
   align-items: center;
   margin-bottom: var(--space-sm);
   gap: var(--space-sm);
   position: relative;
   z-index: 2;
 }
+
+.fixture-meta .fixture-group { margin-right: auto; }
+.fixture-meta .fixture-date { position: absolute; left: 50%; transform: translateX(-50%); }
 
 .fixture-group {
   background: var(--flo-green);
