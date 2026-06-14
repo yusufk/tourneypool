@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
 import fixtures from '../data/fixtures.json'
 import { getFlagUrl } from '../data/flags'
 import { loadLeaderboard, loadPoolLeaderboard, loadPredictions } from '../api'
@@ -103,20 +102,6 @@ export default function Home() {
         </div>
       )}
 
-      <div className="home-cards">
-        <Link to="/fixtures" className="card">
-          <h3>Fixtures</h3>
-          <p>104 matches across 16 venues</p>
-        </Link>
-        <Link to="/predictions" className="card">
-          <h3>Predict</h3>
-          <p>Call the score before kickoff</p>
-        </Link>
-        <Link to="/leaderboard" className="card">
-          <h3>Leaderboard</h3>
-          <p>Who's the prediction GOAT?</p>
-        </Link>
-      </div>
       {selectedMatch && <MatchModal match={selectedMatch} onClose={() => setSelectedMatch(null)} />}
     </div>
   )
