@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import fixtures from '../data/fixtures.json'
 import { getFlagUrl } from '../data/flags'
 import { useAuth } from '../components/AuthProvider'
@@ -43,6 +43,8 @@ export default function Predictions() {
   const [predictions, setPredictions] = useState<Record<number, Prediction>>({})
   const [saving, setSaving] = useState(false)
   const [dirty, setDirty] = useState<Set<number>>(new Set())
+  const firstUnlockedRef = useRef<HTMLDivElement>(null)
+  const scrolledRef = useRef(false)
 
   const roundMatches = allMatches.filter((f) => f.RoundNumber === currentRound)
   const roundIdx = rounds.indexOf(currentRound)
@@ -52,6 +54,13 @@ export default function Predictions() {
       loadPredictions(player).then(setPredictions)
     }
   }, [player])
+
+  useEffect(() => {
+    if (!scrolledRef.current && firstUnlockedRef.current) {
+      setTimeout(() => firstUnlockedRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 300)
+      scrolledRef.current = true
+    }
+  })
 
   const update = (matchNum: number, field: 'homeScore' | 'awayScore', value: string) => {
     setPredictions((prev) => ({
@@ -92,8 +101,9 @@ export default function Predictions() {
       <div className="prediction-list">
         {roundMatches.map((m) => {
           const locked = new Date() >= new Date(m.DateUtc)
+          const isFirstUnlocked = !locked && !roundMatches.slice(0, roundMatches.indexOf(m)).some(prev => new Date() < new Date(prev.DateUtc))
           return (
-            <div key={m.MatchNumber} className={`prediction-card${locked ? ' prediction-locked' : ''}`}>
+            <div key={m.MatchNumber} ref={isFirstUnlocked ? firstUnlockedRef : undefined} className={`prediction-card${locked ? ' prediction-locked' : ''}`}>
               <img className="flag-bg flag-bg-left" src={getFlagUrl(m.HomeTeam)} alt="" />
               <img className="flag-bg flag-bg-right" src={getFlagUrl(m.AwayTeam)} alt="" />
               <span className="pred-date">{formatDate(m.DateUtc)}{m.Group ? ` • ${m.Group}` : ''}{locked ? ' 🔒' : ''}</span>

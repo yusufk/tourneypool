@@ -7,7 +7,7 @@ export default function NavBar() {
   return (
     <nav className="navbar">
       <div className="navbar-brand">
-        TourneyPool
+        FamilyPool
       </div>
       <div className="navbar-links">
         <NavLink to="/"><span className="nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg></span><span className="nav-label">Home</span></NavLink>
