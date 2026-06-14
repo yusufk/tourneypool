@@ -1159,7 +1159,7 @@ body {
   color: var(--flo-green);
 }
 
-/* Floating emojis - physics canvas */
+/* Pool member tables */
 .pool-member-table { margin-bottom: var(--space-lg); }
 .pool-member-table h3 { font-size: var(--fs-sm); color: var(--flo-green); margin-bottom: var(--space-xs); }
 
