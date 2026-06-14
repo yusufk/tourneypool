@@ -13,7 +13,7 @@ export default function Leaderboard() {
   return (
     <div className="page leaderboard">
       <h1>🏅 Leaderboard</h1>
-      <p className="subtitle">TourneyPool Prediction League</p>
+      <p className="subtitle">Family Prediction League</p>
       {players.length === 0 ? (
         <p className="subtitle">No predictions yet — be the first! 🐸</p>
       ) : (

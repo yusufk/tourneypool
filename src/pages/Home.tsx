@@ -6,13 +6,14 @@ import { useAuth } from '../components/AuthProvider'
 import MatchModal from '../components/MatchModal'
 
 const TAGLINES = [
-  'May your predictions age better than your knees. 🦵',
-  'Where overconfidence meets spreadsheets. 📊',
-  "You miss 100% of the predictions you don't make. 🐸",
-  'Bold predictions. Zero accountability. 🎯',
-  'The only place where 0-0 is never boring. 😴',
-  "Trust the process. Blame the ref. 🟨",
-  'Group stage vibes. Knockout dreams. 💭',
+  'Why did the footballer bring string? To tie the score! 🧵',
+  'I told my wife I was watching the World Cup. She said "Which one?" I said "The one on TV." 📺',
+  'What do you call a dinosaur that scores? A dino-score! 🦕',
+  'My predictions are like my cooking — the family pretends to enjoy them. 👨‍🍳',
+  'I used to be a keeper... then the kids came along. 🧤',
+  'Why don\'t grasshoppers watch football? They prefer cricket! 🦗',
+  'Dad predicts 1-0. Always. It\'s called being consistent. 💪',
+  'The family that predicts together, argues at braai together. 🔥',
 ]
 
 interface Match {
@@ -49,7 +50,7 @@ export default function Home() {
   return (
     <div className="page home">
       <div className="home-hero">
-        <h1>TourneyPool</h1>
+        <h1>FamilyPool</h1>
         <h2>World Cup 2026 Predictor</h2>
         <p className="subtitle">{TAGLINES[Math.floor(Math.random() * TAGLINES.length)]}</p>
       </div>

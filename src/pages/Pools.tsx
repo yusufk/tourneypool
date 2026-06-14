@@ -41,7 +41,7 @@ export default function Pools() {
     if (allPools.includes(name)) { setError('Pool already exists'); return }
     // Count user-created pools (pools not in DEFAULT_POOLS that user is in)
     const customCount = myPools.filter(p => !DEFAULT_POOLS.includes(p)).length
-    if (customCount >= 3) { setError('Max 3 custom pools'); return }
+    if (customCount >= 5) { setError('Max 5 custom pools'); return }
     setError('')
     setAllPools(prev => [...prev, name])
     const updated = [...myPools, name]
@@ -72,7 +72,7 @@ export default function Pools() {
           <button onClick={createPool}>Create</button>
         </div>
         {error && <p className="sign-in-error">{error}</p>}
-        <p className="subtitle">Max 3 custom pools per player</p>
+        <p className="subtitle">Max 5 custom pools per player</p>
       </div>
 
       {myPools.length > 0 && Object.keys(poolMembers).length > 0 && (

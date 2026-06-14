@@ -31,9 +31,9 @@ export default function SignIn() {
       <GlobeBackground />
       <div className="sign-in-content">
         <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="TourneyPool" className="sign-in-logo" />
-        <h1>TourneyPool</h1>
+        <h1>FamilyPool</h1>
         <h2>FIFA World Cup 2026™ Predictor</h2>
-        <p>Bold predictions. Zero accountability. 🎯</p>
+        <p>Where family bragging rights are won and lost. 🏆</p>
         <div className="sign-in-form">
           <input type="text" placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} />
           <input type="password" placeholder="PIN (4+)" value={pin} onChange={(e) => setPin(e.target.value)} maxLength={8} onKeyDown={(e) => e.key === 'Enter' && handleSubmit()} />

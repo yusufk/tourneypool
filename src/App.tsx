@@ -29,7 +29,7 @@ function AppContent() {
           </Routes>
         </main>
         <footer className="app-footer">
-          <a href="https://github.com/yusufk/tourneypool" target="_blank" rel="noopener noreferrer">⚽ TourneyPool on GitHub</a>
+          <a href="https://github.com/yusufk/tourneypool" target="_blank" rel="noopener noreferrer">⚽ FamilyPool on GitHub</a>
         </footer>
       </div>
     </BrowserRouter>
