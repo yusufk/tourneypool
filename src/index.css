@@ -64,8 +64,9 @@ body {
   position: relative;
 }
 
-.app > .globe-bg { position: fixed; z-index: 0; }
+.app > .globe-bg { position: fixed; z-index: 0; pointer-events: none; }
 .app > nav, .app > main, .app > footer { position: relative; z-index: 1; }
+.navbar-links { z-index: 200 !important; }
 
 /* Navbar */
 .navbar {
