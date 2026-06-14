@@ -332,13 +332,12 @@ body {
   pointer-events: none;
   border-radius: 3px;
   border: 1px solid rgba(255,255,255,0.2);
+  z-index: 1;
 }
 
 .flag-bg-left { left: 12px; }
 .flag-bg-right {
   right: 12px;
-}
-  mask-image: linear-gradient(to left, rgba(0,0,0,1), rgba(0,0,0,0));
 }
 
 .fixture-meta {
@@ -347,6 +346,8 @@ body {
   align-items: center;
   margin-bottom: var(--space-sm);
   gap: var(--space-sm);
+  position: relative;
+  z-index: 2;
 }
 
 .fixture-group {
@@ -371,6 +372,8 @@ body {
   gap: var(--space-sm);
   font-size: var(--fs-base);
   font-weight: 700;
+  position: relative;
+  z-index: 2;
 }
 
 .fixture-teams .team {
