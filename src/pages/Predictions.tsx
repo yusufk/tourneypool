@@ -144,18 +144,7 @@ export default function Predictions() {
                 <div className="prediction-feedback">
                   {result ? (
                     <>
-                      <div className="prediction-feedback-grid">
-                        <div className="prediction-feedback-item">
-                          <span className="prediction-feedback-label">Final</span>
-                          <strong className="prediction-feedback-value">{result.homeScore} - {result.awayScore}</strong>
-                        </div>
-                        {prediction && (
-                          <div className="prediction-feedback-item">
-                            <span className="prediction-feedback-label">Points</span>
-                            <strong className="prediction-feedback-value">{evaluation?.points ?? 0} pt{evaluation?.points === 1 ? '' : 's'}</strong>
-                          </div>
-                        )}
-                      </div>
+                      <span className="prediction-final-score">FT: {result.homeScore} - {result.awayScore}</span>
                       <span className={`pred-badge prediction-result-badge${evaluation ? ` prediction-result-${evaluation.tone}` : ''}`}>
                         {evaluation ? `${evaluation.label} • ${evaluation.points} pt${evaluation.points === 1 ? '' : 's'}` : 'No prediction saved'}
                       </span>
