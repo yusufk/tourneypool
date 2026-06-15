@@ -206,7 +206,7 @@ export default {
     const schedule = JSON.parse(await env.TOURNEY_KV.get('schedule') || '[]')
     if (!schedule.length) return
 
-    const ALIASES = { 'Bosnia-H.': 'Bosnia and Herzegovina' }
+    const ALIASES = { 'Bosnia-H.': 'Bosnia and Herzegovina', 'Turkey': 'Türkiye', 'Ivory Coast': 'Côte d\u0027Ivoire', 'Curacao': 'Curaçao', 'DR Congo': 'Congo DR', 'Iran': 'IR Iran', 'Cape Verde': 'Cabo Verde' }
 
     const resp = await fetch('https://api.football-data.org/v4/competitions/WC/matches?status=FINISHED', {
       headers: { 'X-Auth-Token': env.FOOTBALL_API_KEY }
