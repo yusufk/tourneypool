@@ -2,8 +2,9 @@ import { useState, useEffect, useRef } from 'react'
 import fixtures from '../data/fixtures.json'
 import { getFlagUrl } from '../data/flags'
 import { useAuth } from '../components/AuthProvider'
-import { savePredictions, loadPredictions } from '../api'
+import { savePredictions, loadPredictions, loadResults } from '../api'
 import Countdown from '../components/Countdown'
+import { evaluatePrediction, type Score } from '../scoring'
 
 interface Match {
   MatchNumber: number
@@ -41,6 +42,7 @@ export default function Predictions() {
   const rounds = [...new Set(allMatches.map((f) => f.RoundNumber))].sort((a, b) => a - b)
   const [currentRound, setCurrentRound] = useState(rounds[0])
   const [predictions, setPredictions] = useState<Record<number, Prediction>>({})
+  const [results, setResults] = useState<Record<string, Score>>({})
   const [saving, setSaving] = useState(false)
   const [dirty, setDirty] = useState<Set<number>>(new Set())
   const firstUnlockedRef = useRef<HTMLDivElement>(null)
@@ -53,6 +55,7 @@ export default function Predictions() {
     if (player) {
       loadPredictions(player).then(setPredictions)
     }
+    loadResults().then(setResults).catch(() => {})
   }, [player])
 
   useEffect(() => {
@@ -101,6 +104,9 @@ export default function Predictions() {
       <div className="prediction-list">
         {roundMatches.map((m) => {
           const locked = new Date() >= new Date(m.DateUtc)
+          const prediction = predictions[m.MatchNumber]
+          const result = results[String(m.MatchNumber)]
+          const evaluation = evaluatePrediction(prediction, result)
           const isFirstUnlocked = !locked && !roundMatches.slice(0, roundMatches.indexOf(m)).some(prev => new Date() < new Date(prev.DateUtc))
           return (
             <div key={m.MatchNumber} ref={isFirstUnlocked ? firstUnlockedRef : undefined} className={`prediction-card${locked ? ' prediction-locked' : ''}`}>
@@ -133,6 +139,20 @@ export default function Predictions() {
                 <button className="save-one-btn" onClick={() => handleSaveOne(m.MatchNumber)} disabled={saving}>
                   {saving ? '...' : '✓ Save'}
                 </button>
+              )}
+              {locked && (
+                <div className="prediction-feedback">
+                  {result ? (
+                    <>
+                      <span className="prediction-final-score">FT: {result.homeScore} - {result.awayScore}</span>
+                      <span className={`pred-badge prediction-result-badge${evaluation ? ` prediction-result-${evaluation.tone}` : ''}`}>
+                        {evaluation ? `${evaluation.label} • ${evaluation.points} pt${evaluation.points === 1 ? '' : 's'}` : 'No prediction saved'}
+                      </span>
+                    </>
+                  ) : (
+                    <span className="pred-badge">Result pending</span>
+                  )}
+                </div>
               )}
             </div>
           )

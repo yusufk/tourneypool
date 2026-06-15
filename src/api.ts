@@ -1,3 +1,5 @@
+import type { Score } from './scoring'
+
 const API_BASE = import.meta.env.VITE_API_URL || ''
 
 function getPin(): string {
@@ -34,6 +36,11 @@ export async function savePredictions(player: string, predictions: Record<number
 export async function loadPredictions(player: string) {
   const res = await fetch(`${API_BASE}/api/predictions/${encodeURIComponent(player)}`)
   return res.json()
+}
+
+export async function loadResults(): Promise<Record<string, Score>> {
+  const res = await fetch(`${API_BASE}/api/results`)
+  return res.ok ? res.json() : {}
 }
 
 export async function loadLeaderboard(): Promise<{ name: string; points: number }[]> {
