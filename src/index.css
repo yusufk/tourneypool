@@ -508,13 +508,63 @@ body {
 }
 
 .prediction-locked {
-  opacity: 0.5;
   background: rgba(20, 30, 40, 0.7) !important;
+  border: 1px solid rgba(255,255,255,0.08);
 }
 
 .prediction-locked input {
   background: rgba(255,255,255,0.05);
   cursor: not-allowed;
+}
+
+.prediction-feedback {
+  margin-top: var(--space-md);
+  padding-top: var(--space-sm);
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.prediction-feedback-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-sm);
+}
+
+.prediction-feedback-item {
+  background: rgba(255,255,255,0.06);
+  border-radius: var(--radius-sm);
+  padding: var(--space-sm);
+  text-align: center;
+}
+
+.prediction-feedback-label {
+  display: block;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 2px;
+}
+
+.prediction-feedback-value {
+  font-size: var(--fs-lg);
+  color: var(--flo-white);
+}
+
+.prediction-result-badge {
+  margin-top: var(--space-sm);
+}
+
+.prediction-result-exact {
+  color: var(--flo-green);
+}
+
+.prediction-result-correct {
+  color: var(--flo-green-dark);
+}
+
+.prediction-result-zero {
+  color: var(--flo-red);
 }
 
 .save-btn {

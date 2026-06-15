@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { getFlag } from '../data/flags'
 import { useAuth } from './AuthProvider'
-import { savePredictions, loadPredictions } from '../api'
+import { savePredictions, loadPredictions, loadResults } from '../api'
 import { useCountdown } from '../hooks/useCountdown'
+import { evaluatePrediction, type Score } from '../scoring'
 
 interface Match {
   MatchNumber: number
@@ -37,7 +38,7 @@ export default function MatchModal({ match, onClose }: { match: Match; onClose: 
   const [away, setAway] = useState('')
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
-  const [result, setResult] = useState<{ homeScore: number; awayScore: number } | null>(null)
+  const [result, setResult] = useState<Score | null>(null)
 
   useEffect(() => {
     if (player) {
@@ -49,9 +50,8 @@ export default function MatchModal({ match, onClose }: { match: Match; onClose: 
         }
       })
     }
-    fetch(`${import.meta.env.VITE_API_URL || ''}/api/results`)
-      .then(r => r.ok ? r.json() : {})
-      .then((results: Record<string, { homeScore: number; awayScore: number }>) => {
+    loadResults()
+      .then((results) => {
         const r = results[String(match.MatchNumber)]
         if (r) setResult(r)
       })
@@ -67,25 +67,15 @@ export default function MatchModal({ match, onClose }: { match: Match; onClose: 
     setTimeout(() => setSaved(false), 2000)
   }
 
-  const outcome = (h: number, a: number) => h > a ? 'H' : h < a ? 'A' : 'D'
-
-  const pts = (() => {
-    if (!result || !home || !away) return 'none'
-    const ph = parseInt(home), pa = parseInt(away)
-    if (ph === result.homeScore && pa === result.awayScore) return 'exact'
-    if (outcome(ph, pa) === outcome(result.homeScore, result.awayScore)) return 'correct'
-    return 'zero'
-  })()
-
-  const getPointsLabel = () => {
-    if (pts === 'exact') return '🎯 Exact! +3 pts'
-    if (pts === 'correct') return '✅ Correct result! +1 pt'
-    return '❌ 0 pts'
-  }
+  const prediction = home !== '' && away !== '' ? { homeScore: parseInt(home) || 0, awayScore: parseInt(away) || 0 } : null
+  const evaluation = evaluatePrediction(prediction, result)
+  const pointsLabel = evaluation
+    ? `${evaluation.label} • ${evaluation.points} pt${evaluation.points === 1 ? '' : 's'}`
+    : ''
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className={`modal-content${pts === 'exact' ? ' modal-confetti' : ''}`} onClick={(e) => e.stopPropagation()}>
+      <div className={`modal-content${evaluation?.status === 'exact' ? ' modal-confetti' : ''}`} onClick={(e) => e.stopPropagation()}>
         <button className="modal-close" onClick={onClose}>✕</button>
         <div className="modal-header">
           {match.Group && <span className="fixture-group">{match.Group}</span>}
@@ -120,7 +110,7 @@ export default function MatchModal({ match, onClose }: { match: Match; onClose: 
               <div className="modal-prediction-compare">
                 <div className="modal-result-label">Your Prediction</div>
                 <div className="modal-result-score">{home} - {away}</div>
-                {result && <div className={`modal-points ${pts}`}>{getPointsLabel()}</div>}
+                {evaluation && <div className={`modal-points ${evaluation.tone}`}>{pointsLabel}</div>}
               </div>
             )}
             {!result && <div className="modal-status">🔴 Kickoff passed — predictions locked</div>}
