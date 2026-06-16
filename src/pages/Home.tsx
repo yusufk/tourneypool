@@ -6,11 +6,14 @@ import { useAuth } from '../components/AuthProvider'
 import MatchModal from '../components/MatchModal'
 
 const TAGLINES = [
+  'Why did the footballer bring string? To tie the score! 🧵',
   'VAR ruined my celebration and my marriage. 📺',
   'My predictions age like milk in a heatwave. 🥛',
   'I peaked in the group stage. It\'s been downhill since. 📉',
+  'Why don\'t grasshoppers watch football? They prefer cricket! 🦗',
   'Offside is just society rejecting you early. 🚩',
   'My gut feeling has a losing record. 🫠',
+  'I used to be a keeper... then the kids came along. 🧤',
   'Bold predictions, zero accountability. The dad way. 💪',
   'The family that predicts together, argues at braai together. 🔥',
 ]
