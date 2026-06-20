@@ -1218,3 +1218,16 @@ body {
 
 .sign-in-logo { width: 140px; height: 140px; margin-bottom: 1rem; filter: drop-shadow(0 4px 20px rgba(255,218,26,0.3)); animation: bounce 2s ease-in-out infinite; }
 @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+/* Groups page */
+.groups-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-md); }
+.group-card { background: rgba(20, 30, 40, 0.85); border-radius: var(--radius-md); padding: var(--space-md); border: 1px solid rgba(255,255,255,0.1); }
+.group-card h3 { margin: 0 0 var(--space-sm); font-size: 1.1rem; color: var(--flo-white); }
+.group-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; color: var(--flo-white); }
+.group-table th { text-align: left; padding: 4px 6px; opacity: 0.6; font-weight: 500; font-size: 0.75rem; }
+.group-table td { padding: 5px 6px; border-top: 1px solid rgba(255,255,255,0.08); }
+.group-flag { width: 20px; height: 14px; object-fit: cover; border-radius: 2px; }
+.group-team-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px; }
+.group-pts { font-weight: 700; }
+.group-table tr.qualify td { background: rgba(76, 175, 80, 0.15); }
+.group-table tr.third td { background: rgba(255, 193, 7, 0.1); }

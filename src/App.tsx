@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider, useAuth } from './components/AuthProvider'
 import Home from './pages/Home'
-import Fixtures from './pages/Fixtures'
+import Groups from './pages/Groups'
 import Leaderboard from './pages/Leaderboard'
 import Predictions from './pages/Predictions'
 import Pools from './pages/Pools'
@@ -22,7 +22,7 @@ function AppContent() {
         <main className="main-content">
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/fixtures" element={<Fixtures />} />
+            <Route path="/fixtures" element={<Groups />} />
             <Route path="/predictions" element={<Predictions />} />
             <Route path="/pools" element={<Pools />} />
             <Route path="/leaderboard" element={<Leaderboard />} />

@@ -40,7 +40,15 @@ export default function Predictions() {
   const { player } = useAuth()
   const allMatches = fixtures as Match[]
   const rounds = [...new Set(allMatches.map((f) => f.RoundNumber))].sort((a, b) => a - b)
-  const [currentRound, setCurrentRound] = useState(rounds[0])
+  const [currentRound, setCurrentRound] = useState(() => {
+    const now = new Date()
+    // Find the round that has the next upcoming match (or last round with matches)
+    for (const r of [...rounds].reverse()) {
+      const roundMs = allMatches.filter(m => m.RoundNumber === r)
+      if (roundMs.some(m => new Date(m.DateUtc) <= now)) return r
+    }
+    return rounds[0]
+  })
   const [predictions, setPredictions] = useState<Record<number, Prediction>>({})
   const [results, setResults] = useState<Record<string, Score>>({})
   const [saving, setSaving] = useState(false)

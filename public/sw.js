@@ -15,7 +15,7 @@ self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return
   e.respondWith(
     fetch(e.request).then(r => {
-      if (r.ok && e.request.url.startsWith(self.location.origin)) {
+      if (r.ok && r.status !== 206 && e.request.url.startsWith(self.location.origin)) {
         const clone = r.clone()
         caches.open(CACHE).then(c => c.put(e.request, clone))
       }

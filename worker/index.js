@@ -198,6 +198,23 @@ export default {
       return json({ ok: true }, 200, corsHeaders)
     }
 
+    // GET /api/standings — group standings from football-data.org (cached, fetches on miss)
+    if (request.method === 'GET' && path === '/api/standings') {
+      let data = await env.TOURNEY_KV.get('standings')
+      if (!data && env.FOOTBALL_API_KEY) {
+        const resp = await fetch('https://api.football-data.org/v4/competitions/WC/standings', {
+          headers: { 'X-Auth-Token': env.FOOTBALL_API_KEY }
+        })
+        if (resp.ok) {
+          const json_ = await resp.json()
+          const standings = json_.standings || []
+          await env.TOURNEY_KV.put('standings', JSON.stringify(standings), { expirationTtl: 3600 })
+          return json(standings, 200, corsHeaders)
+        }
+      }
+      return json(data ? JSON.parse(data) : [], 200, corsHeaders)
+    }
+
     return json({ error: 'Not found' }, 404, corsHeaders)
   },
 
@@ -233,6 +250,15 @@ export default {
 
     if (updated) {
       await env.TOURNEY_KV.put('results', JSON.stringify(results))
+    }
+
+    // Fetch and cache standings
+    const standingsResp = await fetch('https://api.football-data.org/v4/competitions/WC/standings', {
+      headers: { 'X-Auth-Token': env.FOOTBALL_API_KEY }
+    })
+    if (standingsResp.ok) {
+      const standingsData = await standingsResp.json()
+      await env.TOURNEY_KV.put('standings', JSON.stringify(standingsData.standings || []))
     }
   }
 }
