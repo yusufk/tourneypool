@@ -23,3 +23,20 @@ self.addEventListener('fetch', e => {
     }).catch(() => caches.match(e.request))
   )
 })
+
+self.addEventListener('push', e => {
+  const data = e.data ? e.data.json() : {}
+  e.waitUntil(
+    self.registration.showNotification(data.title || '⚽ FamilyPool', {
+      body: data.body || 'New result!',
+      icon: '/tourneypool/icon-192.png',
+      badge: '/tourneypool/icon-192.png',
+      data: { url: '/tourneypool/predictions' }
+    })
+  )
+})
+
+self.addEventListener('notificationclick', e => {
+  e.notification.close()
+  e.waitUntil(clients.openWindow(e.notification.data?.url || '/tourneypool/'))
+})

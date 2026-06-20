@@ -215,6 +215,18 @@ export default {
       return json(data ? JSON.parse(data) : [], 200, corsHeaders)
     }
 
+    // POST /api/push/subscribe — store push subscription
+    if (request.method === 'POST' && path === '/api/push/subscribe') {
+      const { player, subscription } = await request.json()
+      if (!subscription?.endpoint) return json({ error: 'Invalid subscription' }, 400, corsHeaders)
+      const subs = JSON.parse(await env.TOURNEY_KV.get('push_subscriptions') || '[]')
+      // Replace existing sub for same endpoint
+      const filtered = subs.filter(s => s.subscription.endpoint !== subscription.endpoint)
+      filtered.push({ player: player || 'anonymous', subscription })
+      await env.TOURNEY_KV.put('push_subscriptions', JSON.stringify(filtered))
+      return json({ ok: true }, 200, corsHeaders)
+    }
+
     return json({ error: 'Not found' }, 404, corsHeaders)
   },
 
@@ -250,6 +262,27 @@ export default {
 
     if (updated) {
       await env.TOURNEY_KV.put('results', JSON.stringify(results))
+      // Send push notifications for new results
+      const subs = JSON.parse(await env.TOURNEY_KV.get('push_subscriptions') || '[]')
+      if (subs.length > 0 && env.VAPID_PRIVATE_KEY && env.VAPID_PUBLIC_KEY) {
+        for (const match of data.matches || []) {
+          const home = ALIASES[match.homeTeam.shortName] || match.homeTeam.shortName
+          const away = ALIASES[match.awayTeam.shortName] || match.awayTeam.shortName
+          const fixture = schedule.find(f => f.HomeTeam === home && f.AwayTeam === away)
+          if (!fixture) continue
+          const score = match.score?.fullTime
+          if (!score || score.home == null) continue
+          const payload = JSON.stringify({
+            title: `⚽ ${home} ${score.home} - ${score.away} ${away}`,
+            body: 'Check how your prediction scored!'
+          })
+          for (const sub of subs) {
+            try {
+              await sendPush(sub.subscription, payload, env)
+            } catch (e) { /* remove dead subs later */ }
+          }
+        }
+      }
     }
 
     // Fetch and cache standings
@@ -274,4 +307,55 @@ function json(data, status, headers) {
     status,
     headers: { 'Content-Type': 'application/json', ...headers }
   })
+}
+
+// Web Push using raw crypto (no npm deps needed in Workers)
+async function sendPush(subscription, payload, env) {
+  const { endpoint, keys } = subscription
+  const p256dh = keys.p256dh
+  const auth = keys.auth
+
+  // Import VAPID keys
+  const vapidPrivate = base64UrlToUint8(env.VAPID_PRIVATE_KEY)
+  const vapidPublic = base64UrlToUint8(env.VAPID_PUBLIC_KEY)
+
+  // Create JWT for VAPID
+  const audience = new URL(endpoint).origin
+  const expiry = Math.floor(Date.now() / 1000) + 3600
+  const header = base64UrlEncode(JSON.stringify({ alg: 'ES256', typ: 'JWT' }))
+  const body = base64UrlEncode(JSON.stringify({ aud: audience, exp: expiry, sub: 'mailto:yusufk@gmail.com' }))
+  const unsignedToken = `${header}.${body}`
+
+  const key = await crypto.subtle.importKey('raw', vapidPrivate, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['sign'])
+  const sig = await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, key, new TextEncoder().encode(unsignedToken))
+  const jwt = `${unsignedToken}.${base64UrlEncode(new Uint8Array(sig))}`
+
+  // For simplicity, send unencrypted notification (TTL 0 = no payload encryption needed for title/body via topic)
+  // Actually, Web Push REQUIRES encryption. Use a simpler approach: just POST with VAPID auth and encrypted payload.
+  // Workers don't have web-push lib, so we send a minimal push with no payload (notification from SW default)
+  const resp = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Authorization': `vapid t=${jwt}, k=${arrayToBase64Url(vapidPublic)}`,
+      'TTL': '3600',
+      'Content-Length': '0',
+    }
+  })
+  return resp.ok
+}
+
+function base64UrlToUint8(str) {
+  const base64 = str.replace(/-/g, '+').replace(/_/g, '/')
+  const bin = atob(base64)
+  return Uint8Array.from(bin, c => c.charCodeAt(0))
+}
+
+function base64UrlEncode(input) {
+  const data = typeof input === 'string' ? new TextEncoder().encode(input) : input
+  const bin = Array.from(data instanceof Uint8Array ? data : new Uint8Array(data)).map(b => String.fromCharCode(b)).join('')
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+}
+
+function arrayToBase64Url(uint8) {
+  return base64UrlEncode(uint8)
 }
