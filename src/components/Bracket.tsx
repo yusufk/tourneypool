@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react'
-import { SingleEliminationBracket, Match as BracketMatch, SVGViewer } from '@stradivarit/react-tournament-brackets'
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
 
 interface Match { MatchNumber: number; RoundNumber: number; HomeTeam: string; AwayTeam: string; DateUtc: string }
 interface Result { homeScore: number; awayScore: number }
-interface Prediction { homeScore: number; awayScore: number }
+
+const ROUND_NAMES: Record<number, string> = { 4: 'Round of 32', 5: 'Round of 16', 6: 'Quarter-Finals', 7: 'Semi-Finals', 8: 'Final' }
+
+function isPlaceholder(t: string) { return !t || t === 'To be announced' || /^\d[A-L]$/.test(t) || /^3[A-Z]{4,}$/.test(t) }
 
 export default function Bracket() {
   const [schedule, setSchedule] = useState<Match[]>([])
   const [results, setResults] = useState<Record<string, Result>>({})
-  const [predictions, setPredictions] = useState<Record<string, Prediction>>({})
+  const [predictions, setPredictions] = useState<Record<string, any>>({})
   const [selected, setSelected] = useState<Match | null>(null)
   const [homeScore, setHomeScore] = useState('')
   const [awayScore, setAwayScore] = useState('')
@@ -27,46 +29,7 @@ export default function Bracket() {
   const knockout = schedule.filter(m => m.RoundNumber >= 4)
   if (!knockout.length) return <p className="subtitle">Knockout bracket appears after group stage.</p>
 
-  const roundMatches: Record<number, Match[]> = {}
-  for (const m of knockout) {
-    if (!roundMatches[m.RoundNumber]) roundMatches[m.RoundNumber] = []
-    roundMatches[m.RoundNumber].push(m)
-  }
-  const rounds = [4, 5, 6, 7, 8].filter(r => roundMatches[r]?.length)
-
-  const matches = knockout.map((m) => {
-    const r = results[String(m.MatchNumber)]
-    const pred = predictions[String(m.MatchNumber)]
-    const nextRound = rounds[rounds.indexOf(m.RoundNumber) + 1]
-    const nextMatches = nextRound ? roundMatches[nextRound] : []
-    const posInRound = roundMatches[m.RoundNumber].indexOf(m)
-    const nextMatch = nextMatches[Math.floor(posInRound / 2)]
-
-    return {
-      id: m.MatchNumber,
-      name: pred ? `✓ ${m.MatchNumber}` : `M${m.MatchNumber}`,
-      nextMatchId: nextMatch?.MatchNumber || null,
-      tournamentRoundText: String(m.RoundNumber - 3),
-      startTime: m.DateUtc,
-      state: r ? 'DONE' : 'SCHEDULED',
-      participants: [
-        {
-          id: m.HomeTeam,
-          name: m.HomeTeam || 'TBD',
-          resultText: r ? String(r.homeScore) : pred ? `(${pred.homeScore})` : '',
-          isWinner: r ? r.homeScore > r.awayScore : false,
-          status: r ? 'DONE' : null,
-        },
-        {
-          id: m.AwayTeam,
-          name: m.AwayTeam || 'TBD',
-          resultText: r ? String(r.awayScore) : pred ? `(${pred.awayScore})` : '',
-          isWinner: r ? r.awayScore > r.homeScore : false,
-          status: r ? 'DONE' : null,
-        }
-      ]
-    }
-  })
+  const rounds = [4, 5, 6, 7, 8]
 
   async function savePrediction() {
     if (!selected || !player) return
@@ -80,48 +43,54 @@ export default function Bracket() {
 
   return (
     <div>
-      <div style={{ overflow: 'auto', background: 'rgba(0,0,0,0.3)', borderRadius: '0.5rem', padding: '1rem' }}>
-        <SingleEliminationBracket
-          matches={matches}
-          matchComponent={({ match, ...props }: any) => (
-            <div onClick={() => {
-              const m = knockout.find(k => k.MatchNumber === match.id)
-              if (m && !results[String(m.MatchNumber)]) {
-                setSelected(m)
-                const pred = predictions[String(m.MatchNumber)]
-                setHomeScore(pred ? String(pred.homeScore) : '')
-                setAwayScore(pred ? String(pred.awayScore) : '')
-              }
-            }} style={{ cursor: results[String(match.id)] ? 'default' : 'pointer' }}>
-              <BracketMatch match={match} {...props} />
-            </div>
-          )}
-          svgWrapper={({ children, ...props }: any) => (
-            <SVGViewer
-              width={Math.min(1200, window.innerWidth - 40)}
-              height={700}
-              background="transparent"
-              SVGBackground="transparent"
-              {...props}
-            >
-              {children}
-            </SVGViewer>
-          )}
-        />
+      <div className="bk-scroll">
+        <div className="bk-tree">
+          {rounds.map(round => {
+            const matches = knockout.filter(m => m.RoundNumber === round)
+            if (!matches.length) return null
+            return (
+              <div key={round} className="bk-round" data-round={round}>
+                <div className="bk-round-title">{ROUND_NAMES[round]}</div>
+                <div className="bk-round-body">
+                  {matches.map(m => {
+                    const r = results[String(m.MatchNumber)]
+                    const pred = predictions[String(m.MatchNumber)]
+                    return (
+                      <div key={m.MatchNumber} className="bk-seat">
+                        <div className={`bk-tie${pred ? ' predicted' : ''}`} onClick={() => {
+                          if (!r) { setSelected(m); setHomeScore(pred?.homeScore ?? ''); setAwayScore(pred?.awayScore ?? '') }
+                        }}>
+                          <div className={`bk-side${r && r.homeScore > r.awayScore ? ' win' : ''}${isPlaceholder(m.HomeTeam) ? ' tbd' : ''}`}>
+                            <span className="bk-name">{m.HomeTeam || 'TBD'}</span>
+                            <span className="bk-score">{r ? r.homeScore : pred ? `(${pred.homeScore})` : ''}</span>
+                          </div>
+                          <div className={`bk-side${r && r.awayScore > r.homeScore ? ' win' : ''}${isPlaceholder(m.AwayTeam) ? ' tbd' : ''}`}>
+                            <span className="bk-name">{m.AwayTeam || 'TBD'}</span>
+                            <span className="bk-score">{r ? r.awayScore : pred ? `(${pred.awayScore})` : ''}</span>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })}
+        </div>
       </div>
 
       {selected && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }} onClick={() => setSelected(null)}>
           <div style={{ background: '#1a2a1a', padding: '2rem', borderRadius: '1rem', border: '1px solid rgba(255,255,255,0.1)', minWidth: 280 }} onClick={e => e.stopPropagation()}>
-            <h3 style={{ marginBottom: '1rem', textAlign: 'center' }}>Predict Match {selected.MatchNumber}</h3>
+            <h3 style={{ marginBottom: '1rem', textAlign: 'center' }}>Match {selected.MatchNumber}</h3>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', justifyContent: 'center', marginBottom: '1rem' }}>
-              <span style={{ fontSize: '0.9rem', width: 80, textAlign: 'right' }}>{selected.HomeTeam}</span>
-              <input type="number" min="0" value={homeScore} onChange={e => setHomeScore(e.target.value)} style={{ width: 50, textAlign: 'center', padding: '0.4rem', borderRadius: '0.3rem', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(0,0,0,0.3)', color: '#fff' }} />
+              <span style={{ fontSize: '0.85rem', width: 70, textAlign: 'right' }}>{selected.HomeTeam}</span>
+              <input type="number" min="0" value={homeScore} onChange={e => setHomeScore(e.target.value)} style={{ width: 45, textAlign: 'center', padding: '0.4rem', borderRadius: '0.3rem', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(0,0,0,0.3)', color: '#fff' }} />
               <span>-</span>
-              <input type="number" min="0" value={awayScore} onChange={e => setAwayScore(e.target.value)} style={{ width: 50, textAlign: 'center', padding: '0.4rem', borderRadius: '0.3rem', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(0,0,0,0.3)', color: '#fff' }} />
-              <span style={{ fontSize: '0.9rem', width: 80 }}>{selected.AwayTeam}</span>
+              <input type="number" min="0" value={awayScore} onChange={e => setAwayScore(e.target.value)} style={{ width: 45, textAlign: 'center', padding: '0.4rem', borderRadius: '0.3rem', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(0,0,0,0.3)', color: '#fff' }} />
+              <span style={{ fontSize: '0.85rem', width: 70 }}>{selected.AwayTeam}</span>
             </div>
-            <button onClick={savePrediction} style={{ width: '100%', padding: '0.6rem', marginTop: '0.5rem' }}>Save Prediction</button>
+            <button onClick={savePrediction} style={{ width: '100%', padding: '0.6rem', marginTop: '0.5rem' }}>Save</button>
           </div>
         </div>
       )}

@@ -1254,38 +1254,20 @@ body {
 .standings-tabs button.active { color: #fff; border-bottom-color: var(--primary, #4caf50); font-weight: 600; }
 .standings-tabs button:hover:not(.active) { color: #ccc; }
 
-/* Bracket v2 — with connectors */
+/* Bracket — pure CSS (whoadvances style) */
 .bk-scroll { overflow-x: auto; padding: 1rem 0; }
-.bk-bracket { display: flex; flex-direction: row; align-items: stretch; min-width: max-content; min-height: 900px; }
-.bk-round { display: flex; flex-direction: column; }
-.bk-round-title { font-size: 0.7rem; text-transform: uppercase; color: #888; text-align: center; margin-bottom: 0.5rem; letter-spacing: 0.05em; white-space: nowrap; }
-.bk-col { flex: 1; display: flex; flex-direction: column; }
-.bk-slot { flex: 1; display: flex; align-items: center; position: relative; }
-.bk-match { width: 170px; border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; overflow: hidden; background: rgba(255,255,255,0.03); flex-shrink: 0; position: relative; border-right: 2px solid rgba(255,255,255,0.15); }
-.bk-team { display: flex; align-items: center; gap: 6px; padding: 4px 8px; font-size: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.06); }
-.bk-team:last-child { border-bottom: none; }
-.bk-team.win { background: rgba(76,175,80,0.18); font-weight: 600; }
-.bk-team.tbd { opacity: 0.35; font-style: italic; }
-.bk-flag { width: 16px; height: 11px; object-fit: cover; border-radius: 2px; }
+.bk-tree { display: flex; flex-direction: row; align-items: stretch; min-width: max-content; min-height: 800px; }
+.bk-round { display: flex; flex-direction: column; min-width: 190px; }
+.bk-round-title { font-size: 0.7rem; text-transform: uppercase; color: #888; text-align: center; margin-bottom: 0.5rem; letter-spacing: 0.05em; }
+.bk-round-body { flex: 1; display: flex; flex-direction: column; }
+.bk-seat { flex: 1; display: flex; align-items: center; position: relative; min-height: 48px; }
+.bk-tie { width: 170px; border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; overflow: hidden; background: rgba(255,255,255,0.03); cursor: pointer; border-right: 2px solid rgba(255,255,255,0.15); }
+.bk-tie.predicted { border-color: rgba(76,175,80,0.5); }
+.bk-side { display: flex; align-items: center; justify-content: space-between; padding: 4px 8px; font-size: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.bk-side:last-child { border-bottom: none; }
+.bk-side.win { background: rgba(76,175,80,0.18); font-weight: 600; }
+.bk-side.tbd { opacity: 0.35; font-style: italic; }
 .bk-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.bk-score { font-weight: 700; font-size: 0.8rem; min-width: 1rem; text-align: center; }
-
-/* Connector: vertical bracket line on the left of non-first rounds */
-.bk-round:not(:first-child) .bk-slot::before {
-  content: '';
-  position: absolute;
-  right: 100%;
-  width: 16px;
-  top: 25%;
-  height: 50%;
-  border-left: 2px solid rgba(255,255,255,0.15);
-}
-/* Hide the connector div — using CSS pseudo-elements instead */
-.bk-connector { display: none; }
-
-/* Each round's slots space to align with feeding pairs */
-.bk-r4 .bk-col { gap: 2px; }
-.bk-r5 .bk-col { gap: 0; }
-.bk-r6 .bk-col { gap: 0; }
-.bk-r7 .bk-col { gap: 0; }
-.bk-r8 .bk-col { gap: 0; }
+.bk-score { font-weight: 700; font-size: 0.8rem; min-width: 1.2rem; text-align: center; color: #aaa; }
+/* Connector line from previous round */
+.bk-round:not(:first-child) .bk-seat::before { content: ''; position: absolute; right: 100%; width: 14px; top: 25%; height: 50%; border-left: 2px solid rgba(255,255,255,0.15); }
