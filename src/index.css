@@ -1256,22 +1256,24 @@ body {
 
 /* Bracket — pure CSS (whoadvances style) */
 .bk-scroll { overflow-x: auto; padding: 1rem 0; }
-.bk-tree { display: flex; flex-direction: row; align-items: stretch; min-width: max-content; min-height: 800px; }
-.bk-round { display: flex; flex-direction: column; min-width: 190px; }
+.bk-tree { display: flex; flex-direction: row; align-items: stretch; min-width: max-content; }
+.bk-round { display: flex; flex-direction: column; min-width: 210px; padding: 0 20px; }
 .bk-round-title { font-size: 0.7rem; text-transform: uppercase; color: #888; text-align: center; margin-bottom: 0.5rem; letter-spacing: 0.05em; }
-.bk-round-body { flex: 1; display: flex; flex-direction: column; justify-content: space-around; }
-.bk-seat { display: flex; align-items: center; position: relative; padding: 4px 0; }
-.bk-tie { width: 170px; border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; overflow: hidden; background: rgba(255,255,255,0.03); cursor: pointer; border-right: 2px solid rgba(255,255,255,0.15); }
+.bk-round-body { flex: 1; display: flex; flex-direction: column; }
+.bk-seat { flex: 1; display: flex; align-items: center; position: relative; }
+.bk-tie { width: 170px; border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; overflow: hidden; background: rgba(255,255,255,0.03); cursor: pointer; }
 .bk-tie.predicted { border-color: rgba(76,175,80,0.5); }
-.bk-side { display: flex; align-items: center; justify-content: space-between; padding: 4px 8px; font-size: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.bk-side { display: flex; align-items: center; justify-content: space-between; padding: 5px 8px; font-size: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.06); }
 .bk-side:last-child { border-bottom: none; }
 .bk-side.win { background: rgba(76,175,80,0.18); font-weight: 600; }
 .bk-side.tbd { opacity: 0.35; font-style: italic; }
 .bk-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .bk-score { font-weight: 700; font-size: 0.8rem; min-width: 1.2rem; text-align: center; color: #aaa; }
-/* Connector line from previous round */
-.bk-round:not(:first-child) .bk-seat::before { content: ''; position: absolute; right: 100%; width: 14px; top: 25%; height: 50%; border-left: 2px solid rgba(255,255,255,0.15); }
-/* Winner block */
-.bk-winner { display: flex; flex-direction: column; justify-content: center; align-items: center; min-width: 120px; padding: 1rem; }
+/* Connector: horizontal line going right from each seat to next round */
+.bk-seat::after { content: ''; position: absolute; left: 170px; top: 50%; width: 20px; border-top: 2px solid rgba(255,255,255,0.12); }
+/* Connector: vertical line on left of non-first rounds merging two feeds */
+.bk-round:not(:first-child) .bk-seat::before { content: ''; position: absolute; left: -20px; top: 25%; height: 50%; border-left: 2px solid rgba(255,255,255,0.12); }
+/* Winner block — inline after final */
+.bk-winner { display: flex; flex-direction: column; justify-content: center; align-items: center; min-width: 100px; padding: 0 1rem; }
 .bk-winner-label { font-size: 0.7rem; text-transform: uppercase; color: #888; margin-bottom: 0.5rem; }
 .bk-winner-name { font-size: 1.1rem; font-weight: 700; color: #ffd700; text-align: center; }

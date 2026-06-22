@@ -77,9 +77,8 @@ export default function Bracket() {
             )
           })}
         </div>
-      </div>
 
-      {/* Winner block */}
+      {/* Winner block — inside the tree flex row */}
       {(() => {
         const finalMatch = knockout.find(m => m.RoundNumber === 8)
         const finalResult = finalMatch ? results[String(finalMatch.MatchNumber)] : null
@@ -91,6 +90,8 @@ export default function Bracket() {
           </div>
         )
       })()}
+      </div>
+      </div>
 
       {selected && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }} onClick={() => setSelected(null)}>
