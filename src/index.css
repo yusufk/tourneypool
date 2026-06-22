@@ -1258,9 +1258,9 @@ body {
 .bk-scroll { overflow-x: auto; padding: 1rem 0; }
 .bk-tree { position: relative; }
 .bk-round-title { font-size: 0.7rem; text-transform: uppercase; color: #888; text-align: center; letter-spacing: 0.05em; }
-.bk-tie { width: 170px; border: 1px solid rgba(255,255,255,0.25); border-radius: 0.4rem; overflow: hidden; background: rgba(0,0,0,0.6); cursor: pointer; }
+.bk-tie { width: 170px; border: 1px solid rgba(255,255,255,0.25); border-radius: 0.4rem; overflow: hidden; background: rgba(20,30,20,0.9); cursor: pointer; }
 .bk-tie.predicted { border-color: rgba(76,175,80,0.5); }
-.bk-side { display: flex; align-items: center; justify-content: space-between; padding: 0.3rem 0.5rem; font-size: 0.78rem; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.bk-side { display: flex; align-items: center; justify-content: space-between; padding: 0.3rem 0.5rem; font-size: 0.78rem; color: #eee; border-bottom: 1px solid rgba(255,255,255,0.06); }
 .bk-side:last-child { border-bottom: none; }
 .bk-side.win { background: rgba(76,175,80,0.2); font-weight: 600; }
 .bk-side.tbd { opacity: 0.4; font-style: italic; }
