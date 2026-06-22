@@ -1261,7 +1261,7 @@ body {
 .bk-round-title { font-size: 0.75rem; text-transform: uppercase; color: #888; text-align: center; letter-spacing: 0.05em; margin-bottom: 0.75rem; }
 .bk-round-body { display: flex; flex-direction: column; flex: 1; }
 .bk-seat { flex: 1; display: flex; align-items: center; }
-.bk-tie { border: 1px solid rgba(255,255,255,0.1); border-radius: 0.5rem; overflow: hidden; background: rgba(255,255,255,0.03); cursor: pointer; }
+.bk-tie { border: 1px solid rgba(255,255,255,0.2); border-radius: 0.5rem; overflow: hidden; background: rgba(0,0,0,0.5); cursor: pointer; backdrop-filter: blur(4px); }
 .bk-tie.predicted { border-color: rgba(76,175,80,0.4); }
 .bk-side { display: flex; align-items: center; justify-content: space-between; padding: 0.4rem 0.6rem; font-size: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
 .bk-side:last-child { border-bottom: none; }
