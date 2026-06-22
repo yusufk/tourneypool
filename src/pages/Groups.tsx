@@ -34,6 +34,7 @@ function teamName(entry: TeamEntry): string {
 
 export default function Standings() {
   const [standings, setStandings] = useState<StandingsGroup[]>([])
+  const [tab, setTab] = useState<'groups' | 'knockout'>('groups')
 
   useEffect(() => {
     fetch(`${API_BASE}/api/standings`).then(r => r.ok ? r.json() : []).then(setStandings).catch(() => {})
@@ -51,7 +52,12 @@ export default function Standings() {
   return (
     <div className="page groups">
       <h1>🏆 Standings</h1>
-      <div className="groups-grid">
+      <div className="standings-tabs">
+        <button className={tab === 'groups' ? 'active' : ''} onClick={() => setTab('groups')}>Groups</button>
+        <button className={tab === 'knockout' ? 'active' : ''} onClick={() => setTab('knockout')}>Knockout</button>
+      </div>
+      {tab === 'groups' ? (
+        <div className="groups-grid">
         {groups.map(g => (
           <div key={g.group} className="group-card">
             <h3>{g.group}</h3>
@@ -77,8 +83,9 @@ export default function Standings() {
           </div>
         ))}
       </div>
-      <h2 style={{ marginTop: '3rem', marginBottom: '1rem' }}>🏟️ Knockout Bracket</h2>
-      <Bracket />
+      ) : (
+        <Bracket />
+      )}
     </div>
   )
 }
