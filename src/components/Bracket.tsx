@@ -56,7 +56,7 @@ export default function Bracket() {
             <div key={round} className={`bk-round bk-r${round}`}>
               <div className="bk-round-title">{ROUND_NAMES[round]}</div>
               <div className="bk-col">
-                {matches.map((m, mi) => (
+                {matches.map((m) => (
                   <div key={m.MatchNumber} className="bk-slot">
                     <MatchCard match={m} result={results[String(m.MatchNumber)]} />
                     {ri < rounds.length - 1 && <div className="bk-connector" />}
