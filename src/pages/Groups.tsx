@@ -38,6 +38,12 @@ export default function Standings() {
 
   useEffect(() => {
     fetch(`${API_BASE}/api/standings`).then(r => r.ok ? r.json() : []).then(setStandings).catch(() => {})
+    // Default to knockout tab if any R4+ match has started
+    fetch(`${API_BASE}/api/schedule`).then(r => r.ok ? r.json() : []).then((schedule: any[]) => {
+      const now = new Date()
+      const knockoutStarted = schedule.some((m: any) => m.RoundNumber >= 4 && new Date(m.DateUtc) <= now)
+      if (knockoutStarted) setTab('knockout')
+    }).catch(() => {})
   }, [])
 
   const groups = standings.filter(s => s.group?.startsWith('Group'))
