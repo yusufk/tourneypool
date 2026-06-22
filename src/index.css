@@ -1256,12 +1256,12 @@ body {
 
 /* Bracket v2 — with connectors */
 .bk-scroll { overflow-x: auto; padding: 1rem 0; }
-.bk-bracket { display: flex; align-items: stretch; min-width: max-content; }
+.bk-bracket { display: flex; flex-direction: row; align-items: stretch; min-width: max-content; min-height: 900px; }
 .bk-round { display: flex; flex-direction: column; }
-.bk-round-title { font-size: 0.7rem; text-transform: uppercase; color: #888; text-align: center; padding: 0 1rem; margin-bottom: 0.5rem; letter-spacing: 0.05em; white-space: nowrap; }
-.bk-col { display: flex; flex-direction: column; justify-content: space-around; flex: 1; }
-.bk-slot { display: flex; align-items: center; padding: 4px 0; }
-.bk-match { width: 180px; border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; overflow: hidden; background: rgba(255,255,255,0.03); flex-shrink: 0; }
+.bk-round-title { font-size: 0.7rem; text-transform: uppercase; color: #888; text-align: center; margin-bottom: 0.5rem; letter-spacing: 0.05em; white-space: nowrap; }
+.bk-col { flex: 1; display: flex; flex-direction: column; }
+.bk-slot { flex: 1; display: flex; align-items: center; position: relative; }
+.bk-match { width: 170px; border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; overflow: hidden; background: rgba(255,255,255,0.03); flex-shrink: 0; position: relative; border-right: 2px solid rgba(255,255,255,0.15); }
 .bk-team { display: flex; align-items: center; gap: 6px; padding: 4px 8px; font-size: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.06); }
 .bk-team:last-child { border-bottom: none; }
 .bk-team.win { background: rgba(76,175,80,0.18); font-weight: 600; }
@@ -1269,7 +1269,19 @@ body {
 .bk-flag { width: 16px; height: 11px; object-fit: cover; border-radius: 2px; }
 .bk-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .bk-score { font-weight: 700; font-size: 0.8rem; min-width: 1rem; text-align: center; }
-.bk-connector { width: 20px; border-top: 2px solid rgba(255,255,255,0.2); align-self: center; }
+
+/* Connector: vertical bracket line on the left of non-first rounds */
+.bk-round:not(:first-child) .bk-slot::before {
+  content: '';
+  position: absolute;
+  right: 100%;
+  width: 16px;
+  top: 25%;
+  height: 50%;
+  border-left: 2px solid rgba(255,255,255,0.15);
+}
+/* Hide the connector div — using CSS pseudo-elements instead */
+.bk-connector { display: none; }
 
 /* Each round's slots space to align with feeding pairs */
 .bk-r4 .bk-col { gap: 2px; }
