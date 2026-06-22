@@ -198,6 +198,79 @@ export default {
       return json({ ok: true }, 200, corsHeaders)
     }
 
+    // POST /api/schedule (admin - update schedule with resolved knockout teams)
+    if (request.method === 'POST' && path === '/api/schedule') {
+      const authHeader = request.headers.get('Authorization')
+      if (!env.ADMIN_SECRET || authHeader !== `Bearer ${env.ADMIN_SECRET}`) {
+        return json({ error: 'Unauthorized' }, 401, corsHeaders)
+      }
+      const body = await request.json()
+      // body can be: { matches: [{MatchNumber, HomeTeam, AwayTeam}] } for selective updates
+      // or full schedule replacement
+      if (body.matches) {
+        const schedule = JSON.parse(await env.TOURNEY_KV.get('schedule') || '[]')
+        for (const update of body.matches) {
+          const match = schedule.find(m => m.MatchNumber === update.MatchNumber)
+          if (match) {
+            if (update.HomeTeam) match.HomeTeam = update.HomeTeam
+            if (update.AwayTeam) match.AwayTeam = update.AwayTeam
+          }
+        }
+        await env.TOURNEY_KV.put('schedule', JSON.stringify(schedule))
+      } else {
+        await env.TOURNEY_KV.put('schedule', JSON.stringify(body))
+      }
+      return json({ ok: true }, 200, corsHeaders)
+    }
+
+    // GET /api/schedule — return current schedule
+    if (request.method === 'GET' && path === '/api/schedule') {
+      const data = await env.TOURNEY_KV.get('schedule')
+      return json(data ? JSON.parse(data) : [], 200, corsHeaders)
+    }
+
+    // POST /api/resolve-knockout (admin - auto-resolve knockout placeholders from standings)
+    if (request.method === 'POST' && path === '/api/resolve-knockout') {
+      const authHeader = request.headers.get('Authorization')
+      if (!env.ADMIN_SECRET || authHeader !== `Bearer ${env.ADMIN_SECRET}`) {
+        return json({ error: 'Unauthorized' }, 401, corsHeaders)
+      }
+      const schedule = JSON.parse(await env.TOURNEY_KV.get('schedule') || '[]')
+      const standings = JSON.parse(await env.TOURNEY_KV.get('standings') || '[]')
+      if (!standings.length) return json({ error: 'No standings data — wait for groups to complete' }, 400, corsHeaders)
+
+      // Build group position lookup: { "1A": "Mexico", "2A": "South Africa", "3A": "Korea Republic", ... }
+      const positions = {}
+      for (const group of standings) {
+        const letter = group.group?.replace('GROUP_', '') || ''
+        if (!group.table) continue
+        group.table.forEach((team, idx) => {
+          const pos = idx + 1
+          positions[`${pos}${letter}`] = team.team?.name || team.team?.shortName || ''
+        })
+      }
+
+      // Resolve placeholders in knockout matches (Round 4+)
+      let resolved = 0
+      for (const match of schedule) {
+        if (!match.Group && match.RoundNumber >= 4) {
+          // Simple codes like "1A", "2B"
+          if (match.HomeTeam && positions[match.HomeTeam]) {
+            match.HomeTeam = positions[match.HomeTeam]
+            resolved++
+          }
+          if (match.AwayTeam && positions[match.AwayTeam]) {
+            match.AwayTeam = positions[match.AwayTeam]
+            resolved++
+          }
+          // 3rd-place codes like "3ABCDF" are complex — skip auto-resolve for these
+        }
+      }
+
+      await env.TOURNEY_KV.put('schedule', JSON.stringify(schedule))
+      return json({ ok: true, resolved, note: '3rd-place qualifiers (3XXXX) need manual resolution' }, 200, corsHeaders)
+    }
+
     // GET /api/standings — group standings from football-data.org (cached, fetches on miss)
     if (request.method === 'GET' && path === '/api/standings') {
       let data = await env.TOURNEY_KV.get('standings')
@@ -292,6 +365,31 @@ export default {
     if (standingsResp.ok) {
       const standingsData = await standingsResp.json()
       await env.TOURNEY_KV.put('standings', JSON.stringify(standingsData.standings || []))
+
+      // Auto-resolve knockout placeholders if groups are complete
+      const positions = {}
+      for (const group of standingsData.standings || []) {
+        const letter = group.group?.replace('GROUP_', '') || ''
+        if (!group.table || group.table.length < 4) continue
+        // Only resolve if all 3 matchdays are played
+        const allPlayed = group.table.every(t => t.playedGames >= 3)
+        if (!allPlayed) continue
+        group.table.forEach((team, idx) => {
+          positions[`${idx + 1}${letter}`] = team.team?.name || team.team?.shortName || ''
+        })
+      }
+
+      if (Object.keys(positions).length > 0) {
+        const schedule = JSON.parse(await env.TOURNEY_KV.get('schedule') || '[]')
+        let changed = false
+        for (const match of schedule) {
+          if (!match.Group && match.RoundNumber >= 4) {
+            if (match.HomeTeam && positions[match.HomeTeam]) { match.HomeTeam = positions[match.HomeTeam]; changed = true }
+            if (match.AwayTeam && positions[match.AwayTeam]) { match.AwayTeam = positions[match.AwayTeam]; changed = true }
+          }
+        }
+        if (changed) await env.TOURNEY_KV.put('schedule', JSON.stringify(schedule))
+      }
     }
   }
 }
