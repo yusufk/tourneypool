@@ -76,21 +76,18 @@ export default function Bracket() {
               </div>
             )
           })}
+          {(() => {
+            const finalMatch = knockout.find(m => m.RoundNumber === 8)
+            const finalResult = finalMatch ? results[String(finalMatch.MatchNumber)] : null
+            const winner = finalResult ? (finalResult.homeScore > finalResult.awayScore ? finalMatch!.HomeTeam : finalMatch!.AwayTeam) : null
+            return (
+              <div className="bk-winner">
+                <div className="bk-winner-label">🏆 Champion</div>
+                <div className="bk-winner-name">{winner || '?'}</div>
+              </div>
+            )
+          })()}
         </div>
-
-      {/* Winner block — inside the tree flex row */}
-      {(() => {
-        const finalMatch = knockout.find(m => m.RoundNumber === 8)
-        const finalResult = finalMatch ? results[String(finalMatch.MatchNumber)] : null
-        const winner = finalResult ? (finalResult.homeScore > finalResult.awayScore ? finalMatch!.HomeTeam : finalMatch!.AwayTeam) : null
-        return (
-          <div className="bk-winner">
-            <div className="bk-winner-label">🏆 Champion</div>
-            <div className="bk-winner-name">{winner || '?'}</div>
-          </div>
-        )
-      })()}
-      </div>
       </div>
 
       {selected && (
