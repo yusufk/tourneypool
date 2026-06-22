@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { getFlagUrl } from '../data/flags'
+import Bracket from '../components/Bracket'
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
 
@@ -76,6 +77,8 @@ export default function Standings() {
           </div>
         ))}
       </div>
+      <h2 style={{ marginTop: '3rem', marginBottom: '1rem' }}>🏟️ Knockout Bracket</h2>
+      <Bracket />
     </div>
   )
 }
