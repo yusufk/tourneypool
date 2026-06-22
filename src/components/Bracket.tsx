@@ -6,6 +6,9 @@ interface Match { MatchNumber: number; RoundNumber: number; HomeTeam: string; Aw
 interface Result { homeScore: number; awayScore: number }
 
 const ROUND_NAMES: Record<number, string> = { 4: 'Round of 32', 5: 'Round of 16', 6: 'Quarter-Finals', 7: 'Semi-Finals', 8: 'Final' }
+const MATCH_H = 44 // height of one match card
+const GAP = 8 // gap between R32 matches
+const COL_W = 200 // width per round column
 
 function isPlaceholder(t: string) { return !t || t === 'To be announced' || /^\d[A-L]$/.test(t) || /^3[A-Z]{4,}$/.test(t) }
 
@@ -30,6 +33,34 @@ export default function Bracket() {
   if (!knockout.length) return <p className="subtitle">Knockout bracket appears after group stage.</p>
 
   const rounds = [4, 5, 6, 7, 8]
+  const roundMatches: Record<number, Match[]> = {}
+  for (const m of knockout) {
+    if (!roundMatches[m.RoundNumber]) roundMatches[m.RoundNumber] = []
+    roundMatches[m.RoundNumber].push(m)
+  }
+
+  // Calculate Y positions: R32 items stacked with GAP, later rounds centered between pairs
+  const positions: Record<number, number[]> = {}
+  const r32Count = roundMatches[4]?.length || 16
+  positions[4] = Array.from({ length: r32Count }, (_, i) => i * (MATCH_H + GAP))
+
+  for (let ri = 1; ri < rounds.length; ri++) {
+    const round = rounds[ri]
+    const prevPositions = positions[rounds[ri - 1]] || []
+    const count = roundMatches[round]?.length || 0
+    positions[round] = []
+    for (let i = 0; i < count; i++) {
+      const top = prevPositions[i * 2] ?? 0
+      const bot = prevPositions[i * 2 + 1] ?? top
+      positions[round].push((top + bot + MATCH_H) / 2 - MATCH_H / 2)
+    }
+  }
+
+  const totalH = r32Count * (MATCH_H + GAP)
+  const totalW = rounds.length * COL_W + 120
+
+  // Champion position
+  const finalY = positions[8]?.[0] ?? totalH / 2 - MATCH_H / 2
 
   async function savePrediction() {
     if (!selected || !player) return
@@ -44,49 +75,42 @@ export default function Bracket() {
   return (
     <div>
       <div className="bk-scroll">
-        <div className="bk-tree">
-          {rounds.map(round => {
-            const matches = knockout.filter(m => m.RoundNumber === round)
-            if (!matches.length) return null
-            return (
-              <div key={round} className="bk-round" data-round={round}>
-                <div className="bk-round-title">{ROUND_NAMES[round]}</div>
-                <div className="bk-round-body">
-                  {matches.map(m => {
-                    const r = results[String(m.MatchNumber)]
-                    const pred = predictions[String(m.MatchNumber)]
-                    return (
-                      <div key={m.MatchNumber} className="bk-seat">
-                        <div className={`bk-tie${pred ? ' predicted' : ''}`} onClick={() => {
-                          if (!r) { setSelected(m); setHomeScore(pred?.homeScore ?? ''); setAwayScore(pred?.awayScore ?? '') }
-                        }}>
-                          <div className={`bk-side${r && r.homeScore > r.awayScore ? ' win' : ''}${isPlaceholder(m.HomeTeam) ? ' tbd' : ''}`}>
-                            <span className="bk-name">{m.HomeTeam || 'TBD'}</span>
-                            <span className="bk-score">{r ? r.homeScore : pred ? `(${pred.homeScore})` : ''}</span>
-                          </div>
-                          <div className={`bk-side${r && r.awayScore > r.homeScore ? ' win' : ''}${isPlaceholder(m.AwayTeam) ? ' tbd' : ''}`}>
-                            <span className="bk-name">{m.AwayTeam || 'TBD'}</span>
-                            <span className="bk-score">{r ? r.awayScore : pred ? `(${pred.awayScore})` : ''}</span>
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  })}
+        <div className="bk-tree" style={{ width: totalW, height: totalH }}>
+          {rounds.map((round, ri) => {
+            const matches = roundMatches[round] || []
+            return matches.map((m, mi) => {
+              const r = results[String(m.MatchNumber)]
+              const pred = predictions[String(m.MatchNumber)]
+              const x = ri * COL_W
+              const y = positions[round][mi] ?? 0
+              return (
+                <div key={m.MatchNumber} className="bk-seat" style={{ position: 'absolute', left: x, top: y + 24 }}>
+                  {mi === 0 && <div className="bk-round-title" style={{ position: 'absolute', top: -22, width: 170 }}>{ROUND_NAMES[round]}</div>}
+                  <div className={`bk-tie${pred ? ' predicted' : ''}`} onClick={() => {
+                    if (!r) { setSelected(m); setHomeScore(pred?.homeScore ?? ''); setAwayScore(pred?.awayScore ?? '') }
+                  }}>
+                    <div className={`bk-side${r && r.homeScore > r.awayScore ? ' win' : ''}${isPlaceholder(m.HomeTeam) ? ' tbd' : ''}`}>
+                      <span className="bk-name">{m.HomeTeam || 'TBD'}</span>
+                      <span className="bk-score">{r ? r.homeScore : pred ? `(${pred.homeScore})` : ''}</span>
+                    </div>
+                    <div className={`bk-side${r && r.awayScore > r.homeScore ? ' win' : ''}${isPlaceholder(m.AwayTeam) ? ' tbd' : ''}`}>
+                      <span className="bk-name">{m.AwayTeam || 'TBD'}</span>
+                      <span className="bk-score">{r ? r.awayScore : pred ? `(${pred.awayScore})` : ''}</span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            )
+              )
+            })
           })}
-          {(() => {
-            const finalMatch = knockout.find(m => m.RoundNumber === 8)
-            const finalResult = finalMatch ? results[String(finalMatch.MatchNumber)] : null
-            const winner = finalResult ? (finalResult.homeScore > finalResult.awayScore ? finalMatch!.HomeTeam : finalMatch!.AwayTeam) : null
-            return (
-              <div className="bk-winner">
-                <div className="bk-winner-label">🏆 Champion</div>
-                <div className="bk-winner-name">{winner || '?'}</div>
-              </div>
-            )
-          })()}
+          {/* Champion */}
+          <div className="bk-winner" style={{ position: 'absolute', left: rounds.length * COL_W, top: finalY + 24 }}>
+            <div className="bk-winner-label">🏆</div>
+            <div className="bk-winner-name">{(() => {
+              const f = knockout.find(m => m.RoundNumber === 8)
+              const fr = f ? results[String(f.MatchNumber)] : null
+              return fr ? (fr.homeScore > fr.awayScore ? f!.HomeTeam : f!.AwayTeam) : '?'
+            })()}</div>
+          </div>
         </div>
       </div>
 
