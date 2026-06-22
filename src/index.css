@@ -1256,11 +1256,11 @@ body {
 
 /* Bracket v2 — with connectors */
 .bk-scroll { overflow-x: auto; padding: 1rem 0; }
-.bk-bracket { display: flex; align-items: stretch; gap: 0; min-width: max-content; }
+.bk-bracket { display: flex; align-items: stretch; min-width: max-content; }
 .bk-round { display: flex; flex-direction: column; }
 .bk-round-title { font-size: 0.7rem; text-transform: uppercase; color: #888; text-align: center; padding: 0 1rem; margin-bottom: 0.5rem; letter-spacing: 0.05em; white-space: nowrap; }
-.bk-col { display: flex; flex-direction: column; justify-content: space-around; flex: 1; gap: 0.25rem; padding: 0 0.25rem; }
-.bk-slot { display: flex; align-items: center; }
+.bk-col { display: flex; flex-direction: column; justify-content: space-around; flex: 1; }
+.bk-slot { display: flex; align-items: center; padding: 4px 0; }
 .bk-match { width: 180px; border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; overflow: hidden; background: rgba(255,255,255,0.03); flex-shrink: 0; }
 .bk-team { display: flex; align-items: center; gap: 6px; padding: 4px 8px; font-size: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.06); }
 .bk-team:last-child { border-bottom: none; }
@@ -1269,11 +1269,11 @@ body {
 .bk-flag { width: 16px; height: 11px; object-fit: cover; border-radius: 2px; }
 .bk-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .bk-score { font-weight: 700; font-size: 0.8rem; min-width: 1rem; text-align: center; }
-.bk-connector { width: 24px; height: 2px; background: rgba(255,255,255,0.15); flex-shrink: 0; }
+.bk-connector { width: 20px; border-top: 2px solid rgba(255,255,255,0.2); align-self: center; }
 
-/* Scale rounds so later rounds get more vertical space (pairs feed into next) */
-.bk-r4 .bk-col { gap: 0.25rem; }
-.bk-r5 .bk-col { gap: 2rem; }
-.bk-r6 .bk-col { gap: 5rem; }
-.bk-r7 .bk-col { gap: 10rem; }
+/* Each round's slots space to align with feeding pairs */
+.bk-r4 .bk-col { gap: 2px; }
+.bk-r5 .bk-col { gap: 0; }
+.bk-r6 .bk-col { gap: 0; }
+.bk-r7 .bk-col { gap: 0; }
 .bk-r8 .bk-col { gap: 0; }
