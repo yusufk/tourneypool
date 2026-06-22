@@ -391,6 +391,34 @@ export default {
         if (changed) await env.TOURNEY_KV.put('schedule', JSON.stringify(schedule))
       }
     }
+
+    // Propagate knockout winners: fetch knockout matches from API and fill "To be announced" slots
+    const koResp = await fetch('https://api.football-data.org/v4/competitions/WC/matches?stage=LAST_32,LAST_16,QUARTER_FINALS,SEMI_FINALS,FINAL', {
+      headers: { 'X-Auth-Token': env.FOOTBALL_API_KEY }
+    })
+    if (koResp.ok) {
+      const koData = await koResp.json()
+      const sched = JSON.parse(await env.TOURNEY_KV.get('schedule') || '[]')
+      let koChanged = false
+      for (const apiMatch of koData.matches || []) {
+        const home = ALIASES[apiMatch.homeTeam?.shortName] || apiMatch.homeTeam?.shortName
+        const away = ALIASES[apiMatch.awayTeam?.shortName] || apiMatch.awayTeam?.shortName
+        if (!home || !away) continue
+        const apiDate = apiMatch.utcDate?.slice(0, 10)
+        const fixture = sched.find(f => {
+          if (f.Group || f.RoundNumber < 4) return false
+          const fDate = f.DateUtc?.slice(0, 10)
+          return fDate === apiDate && (
+            (f.HomeTeam === home && f.AwayTeam === away) ||
+            (f.HomeTeam === 'To be announced' || f.AwayTeam === 'To be announced') && fDate === apiDate
+          )
+        })
+        if (!fixture) continue
+        if (fixture.HomeTeam === 'To be announced' && home) { fixture.HomeTeam = home; koChanged = true }
+        if (fixture.AwayTeam === 'To be announced' && away) { fixture.AwayTeam = away; koChanged = true }
+      }
+      if (koChanged) await env.TOURNEY_KV.put('schedule', JSON.stringify(sched))
+    }
   }
 }
 
