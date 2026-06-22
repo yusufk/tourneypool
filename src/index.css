@@ -1269,6 +1269,6 @@ body {
 .bk-side.tbd { opacity: 0.4; font-style: italic; }
 .bk-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .bk-score { font-weight: 700; font-size: 0.85rem; min-width: 1.2rem; text-align: center; }
-.bk-winner { flex-shrink: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 1rem; }
+.bk-winner { flex-shrink: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; align-self: center; padding: 1rem; }
 .bk-winner-label { font-size: 0.7rem; text-transform: uppercase; color: #888; margin-bottom: 0.5rem; }
 .bk-winner-name { font-size: 1.2rem; font-weight: 700; color: #ffd700; }
