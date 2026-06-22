@@ -79,6 +79,19 @@ export default function Bracket() {
         </div>
       </div>
 
+      {/* Winner block */}
+      {(() => {
+        const finalMatch = knockout.find(m => m.RoundNumber === 8)
+        const finalResult = finalMatch ? results[String(finalMatch.MatchNumber)] : null
+        const winner = finalResult ? (finalResult.homeScore > finalResult.awayScore ? finalMatch!.HomeTeam : finalMatch!.AwayTeam) : null
+        return (
+          <div className="bk-winner">
+            <div className="bk-winner-label">🏆 Champion</div>
+            <div className="bk-winner-name">{winner || '?'}</div>
+          </div>
+        )
+      })()}
+
       {selected && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }} onClick={() => setSelected(null)}>
           <div style={{ background: '#1a2a1a', padding: '2rem', borderRadius: '1rem', border: '1px solid rgba(255,255,255,0.1)', minWidth: 280 }} onClick={e => e.stopPropagation()}>
