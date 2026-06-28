@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import fixtures from '../data/fixtures.json'
 import { getFlagUrl } from '../data/flags'
 import { loadLeaderboard, loadPoolLeaderboard, loadPredictions } from '../api'
 import { useAuth } from '../components/AuthProvider'
@@ -28,26 +27,31 @@ interface Match {
   Group: string | null
 }
 
-function getTodaysMatches() {
+function getTodaysMatches(matches: Match[]) {
   const today = new Date().toISOString().split('T')[0]
-  return (fixtures as Match[]).filter(f => f.DateUtc.startsWith(today) && f.Group)
+  return matches.filter(f => f.DateUtc.startsWith(today))
 }
 
 export default function Home() {
-  const todaysMatches = getTodaysMatches()
   const { player } = useAuth()
+  const [allMatches, setAllMatches] = useState<Match[]>([])
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null)
   const [goat, setGoat] = useState<{ name: string; points: number } | null>(null)
   const [goatPool, setGoatPool] = useState<{ name: string; points: number } | null>(null)
   const [results, setResults] = useState<Record<string, { homeScore: number; awayScore: number }>>({})
   const [predictions, setPredictions] = useState<Record<string, { homeScore: number; awayScore: number }>>({})
 
+  const API_BASE = import.meta.env.VITE_API_URL || ''
+
   useEffect(() => {
+    fetch(`${API_BASE}/api/schedule`).then(r => r.ok ? r.json() : []).then(setAllMatches)
     loadLeaderboard().then(lb => { if (lb.length) setGoat(lb[0]) })
     loadPoolLeaderboard().then(data => { if (data.leaderboard?.length) setGoatPool(data.leaderboard[0]) })
-    fetch(`${import.meta.env.VITE_API_URL || ''}/api/results`).then(r => r.ok ? r.json() : {}).then(setResults).catch(() => {})
+    fetch(`${API_BASE}/api/results`).then(r => r.ok ? r.json() : {}).then(setResults).catch(() => {})
     if (player) loadPredictions(player).then(setPredictions)
   }, [player])
+
+  const todaysMatches = getTodaysMatches(allMatches)
 
   return (
     <div className="page home">

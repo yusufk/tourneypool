@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react'
-import fixtures from '../data/fixtures.json'
 import { getFlagUrl } from '../data/flags'
 import { useAuth } from '../components/AuthProvider'
 import { savePredictions, loadPredictions, loadResults } from '../api'
@@ -38,17 +37,8 @@ function formatDate(utc: string): string {
 
 export default function Predictions() {
   const { player } = useAuth()
-  const allMatches = fixtures as Match[]
-  const rounds = [...new Set(allMatches.map((f) => f.RoundNumber))].sort((a, b) => a - b)
-  const [currentRound, setCurrentRound] = useState(() => {
-    const now = new Date()
-    // Find the round that has the next upcoming match (or last round with matches)
-    for (const r of [...rounds].reverse()) {
-      const roundMs = allMatches.filter(m => m.RoundNumber === r)
-      if (roundMs.some(m => new Date(m.DateUtc) <= now)) return r
-    }
-    return rounds[0]
-  })
+  const [allMatches, setAllMatches] = useState<Match[]>([])
+  const [currentRound, setCurrentRound] = useState(1)
   const [predictions, setPredictions] = useState<Record<number, Prediction>>({})
   const [results, setResults] = useState<Record<string, Score>>({})
   const [saving, setSaving] = useState(false)
@@ -56,15 +46,25 @@ export default function Predictions() {
   const firstUnlockedRef = useRef<HTMLDivElement>(null)
   const scrolledRef = useRef(false)
 
-  const roundMatches = allMatches.filter((f) => f.RoundNumber === currentRound)
-  const roundIdx = rounds.indexOf(currentRound)
+  const API_BASE = import.meta.env.VITE_API_URL || ''
 
   useEffect(() => {
-    if (player) {
-      loadPredictions(player).then(setPredictions)
-    }
+    fetch(`${API_BASE}/api/schedule`).then(r => r.ok ? r.json() : []).then((data: Match[]) => {
+      setAllMatches(data)
+      const rounds = [...new Set(data.map(f => f.RoundNumber))].sort((a, b) => a - b)
+      const now = new Date()
+      for (const r of [...rounds].reverse()) {
+        if (data.filter(m => m.RoundNumber === r).some(m => new Date(m.DateUtc) <= now)) { setCurrentRound(r); return }
+      }
+      if (rounds.length) setCurrentRound(rounds[0])
+    })
+    if (player) loadPredictions(player).then(setPredictions)
     loadResults().then(setResults).catch(() => {})
   }, [player])
+
+  const rounds = [...new Set(allMatches.map(f => f.RoundNumber))].sort((a, b) => a - b)
+  const roundMatches = allMatches.filter((f) => f.RoundNumber === currentRound)
+  const roundIdx = rounds.indexOf(currentRound)
 
   useEffect(() => {
     if (!scrolledRef.current && firstUnlockedRef.current) {

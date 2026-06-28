@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import fixtures from '../data/fixtures.json'
 import { getFlagUrl } from '../data/flags'
 import MatchModal from '../components/MatchModal'
 import Countdown from '../components/Countdown'
@@ -43,20 +42,23 @@ const API_BASE = import.meta.env.VITE_API_URL || ''
 
 export default function Fixtures() {
   const { player } = useAuth()
-  const allMatches = fixtures as Match[]
-  const rounds = [...new Set(allMatches.map((f) => f.RoundNumber))].sort((a, b) => a - b)
-  const [currentRound, setCurrentRound] = useState(rounds[0])
+  const [allMatches, setAllMatches] = useState<Match[]>([])
+  const [currentRound, setCurrentRound] = useState(1)
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null)
   const [results, setResults] = useState<Record<string, { homeScore: number; awayScore: number }>>({})
   const [predictions, setPredictions] = useState<Record<string, unknown>>({})
 
   useEffect(() => {
+    fetch(`${API_BASE}/api/schedule`).then(r => r.ok ? r.json() : []).then((data: Match[]) => {
+      setAllMatches(data)
+      const rounds = [...new Set(data.map(f => f.RoundNumber))].sort((a, b) => a - b)
+      if (rounds.length) setCurrentRound(rounds[0])
+    })
     if (player) loadPredictions(player).then(setPredictions)
-    fetch(`${API_BASE}/api/leaderboard`).catch(() => {})
-    // Fetch results by checking a known endpoint - reuse the results stored in KV
     fetch(`${API_BASE}/api/results`).then(r => r.ok ? r.json() : {}).then(setResults).catch(() => {})
   }, [])
 
+  const rounds = [...new Set(allMatches.map(f => f.RoundNumber))].sort((a, b) => a - b)
   const roundMatches = allMatches.filter((f) => f.RoundNumber === currentRound)
   const roundIdx = rounds.indexOf(currentRound)
 

@@ -1,3 +1,5 @@
+const ALIASES = { 'Bosnia-H.': 'Bosnia and Herzegovina', 'Turkey': 'Türkiye', 'Ivory Coast': 'Côte d\u0027Ivoire', 'Curacao': 'Curaçao', 'DR Congo': 'Congo DR', 'Iran': 'IR Iran', 'Cape Verde': 'Cabo Verde', 'United States': 'USA', 'South Korea': 'Korea Republic', 'Bosnia-Herzegovina': 'Bosnia and Herzegovina', 'Cape Verde Islands': 'Cabo Verde' }
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url)
@@ -242,11 +244,12 @@ export default {
       // Build group position lookup: { "1A": "Mexico", "2A": "South Africa", "3A": "Korea Republic", ... }
       const positions = {}
       for (const group of standings) {
-        const letter = group.group?.replace('GROUP_', '') || ''
+        const letter = group.group?.replace('GROUP_', '').replace('Group ', '') || ''
         if (!group.table) continue
         group.table.forEach((team, idx) => {
           const pos = idx + 1
-          positions[`${pos}${letter}`] = team.team?.name || team.team?.shortName || ''
+          const raw = team.team?.name || team.team?.shortName || ''
+          positions[`${pos}${letter}`] = ALIASES[raw] || ALIASES[team.team?.shortName] || raw
         })
       }
 
@@ -308,8 +311,6 @@ export default {
     const schedule = JSON.parse(await env.TOURNEY_KV.get('schedule') || '[]')
     if (!schedule.length) return
 
-    const ALIASES = { 'Bosnia-H.': 'Bosnia and Herzegovina', 'Turkey': 'Türkiye', 'Ivory Coast': 'Côte d\u0027Ivoire', 'Curacao': 'Curaçao', 'DR Congo': 'Congo DR', 'Iran': 'IR Iran', 'Cape Verde': 'Cabo Verde' }
-
     const resp = await fetch('https://api.football-data.org/v4/competitions/WC/matches?status=FINISHED', {
       headers: { 'X-Auth-Token': env.FOOTBALL_API_KEY }
     })
@@ -369,13 +370,14 @@ export default {
       // Auto-resolve knockout placeholders if groups are complete
       const positions = {}
       for (const group of standingsData.standings || []) {
-        const letter = group.group?.replace('GROUP_', '') || ''
+        const letter = group.group?.replace('GROUP_', '').replace('Group ', '') || ''
         if (!group.table || group.table.length < 4) continue
         // Only resolve if all 3 matchdays are played
         const allPlayed = group.table.every(t => t.playedGames >= 3)
         if (!allPlayed) continue
         group.table.forEach((team, idx) => {
-          positions[`${idx + 1}${letter}`] = team.team?.name || team.team?.shortName || ''
+          const raw = team.team?.name || team.team?.shortName || ''
+          positions[`${idx + 1}${letter}`] = ALIASES[raw] || ALIASES[team.team?.shortName] || raw
         })
       }
 
