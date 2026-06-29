@@ -395,6 +395,7 @@ export default {
     }
 
     // Propagate knockout winners: fetch knockout matches from API and fill "To be announced" slots
+    const stageToRound = { LAST_32: 4, LAST_16: 5, QUARTER_FINALS: 6, SEMI_FINALS: 7, FINAL: 8, THIRD_PLACE: 8 }
     const koResp = await fetch('https://api.football-data.org/v4/competitions/WC/matches?stage=LAST_32,LAST_16,QUARTER_FINALS,SEMI_FINALS,FINAL', {
       headers: { 'X-Auth-Token': env.FOOTBALL_API_KEY }
     })
@@ -407,12 +408,14 @@ export default {
         const away = ALIASES[apiMatch.awayTeam?.shortName] || apiMatch.awayTeam?.shortName
         if (!home || !away) continue
         const apiDate = apiMatch.utcDate?.slice(0, 10)
+        const apiRound = stageToRound[apiMatch.stage] || 0
         const fixture = sched.find(f => {
           if (f.Group || f.RoundNumber < 4) return false
+          if (apiRound && f.RoundNumber !== apiRound) return false
           const fDate = f.DateUtc?.slice(0, 10)
           return fDate === apiDate && (
             (f.HomeTeam === home && f.AwayTeam === away) ||
-            (f.HomeTeam === 'To be announced' || f.AwayTeam === 'To be announced') && fDate === apiDate
+            (f.HomeTeam === 'To be announced' || f.AwayTeam === 'To be announced')
           )
         })
         if (!fixture) continue
