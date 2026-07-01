@@ -1,5 +1,3 @@
-const ALIASES = { 'Bosnia-H.': 'Bosnia and Herzegovina', 'Turkey': 'Türkiye', 'Ivory Coast': 'Côte d\u0027Ivoire', 'Curacao': 'Curaçao', 'DR Congo': 'Congo DR', 'Iran': 'IR Iran', 'Cape Verde': 'Cabo Verde', 'United States': 'USA', 'South Korea': 'Korea Republic', 'Bosnia-Herzegovina': 'Bosnia and Herzegovina', 'Cape Verde Islands': 'Cabo Verde' }
-
 export default {
   async fetch(request, env) {
     const url = new URL(request.url)
@@ -244,12 +242,11 @@ export default {
       // Build group position lookup: { "1A": "Mexico", "2A": "South Africa", "3A": "Korea Republic", ... }
       const positions = {}
       for (const group of standings) {
-        const letter = group.group?.replace('GROUP_', '').replace('Group ', '') || ''
+        const letter = group.group?.replace('GROUP_', '') || ''
         if (!group.table) continue
         group.table.forEach((team, idx) => {
           const pos = idx + 1
-          const raw = team.team?.name || team.team?.shortName || ''
-          positions[`${pos}${letter}`] = ALIASES[raw] || ALIASES[team.team?.shortName] || raw
+          positions[`${pos}${letter}`] = team.team?.name || team.team?.shortName || ''
         })
       }
 
@@ -311,6 +308,8 @@ export default {
     const schedule = JSON.parse(await env.TOURNEY_KV.get('schedule') || '[]')
     if (!schedule.length) return
 
+    const ALIASES = { 'Bosnia-H.': 'Bosnia and Herzegovina', 'Turkey': 'Türkiye', 'Ivory Coast': 'Côte d\u0027Ivoire', 'Curacao': 'Curaçao', 'DR Congo': 'Congo DR', 'Iran': 'IR Iran', 'Cape Verde': 'Cabo Verde' }
+
     const resp = await fetch('https://api.football-data.org/v4/competitions/WC/matches?status=FINISHED', {
       headers: { 'X-Auth-Token': env.FOOTBALL_API_KEY }
     })
@@ -323,7 +322,14 @@ export default {
     for (const match of data.matches || []) {
       const home = ALIASES[match.homeTeam.shortName] || match.homeTeam.shortName
       const away = ALIASES[match.awayTeam.shortName] || match.awayTeam.shortName
-      const fixture = schedule.find(f => f.HomeTeam === home && f.AwayTeam === away)
+      const homeRaw = match.homeTeam.shortName
+      const awayRaw = match.awayTeam.shortName
+      const fixture = schedule.find(f =>
+        (f.HomeTeam === home && f.AwayTeam === away) ||
+        (f.HomeTeam === homeRaw && f.AwayTeam === awayRaw) ||
+        (f.HomeTeam === home && f.AwayTeam === awayRaw) ||
+        (f.HomeTeam === homeRaw && f.AwayTeam === away)
+      )
       if (!fixture) continue
       const key = String(fixture.MatchNumber)
       const score = match.score?.fullTime
@@ -370,14 +376,13 @@ export default {
       // Auto-resolve knockout placeholders if groups are complete
       const positions = {}
       for (const group of standingsData.standings || []) {
-        const letter = group.group?.replace('GROUP_', '').replace('Group ', '') || ''
+        const letter = group.group?.replace('GROUP_', '') || ''
         if (!group.table || group.table.length < 4) continue
         // Only resolve if all 3 matchdays are played
         const allPlayed = group.table.every(t => t.playedGames >= 3)
         if (!allPlayed) continue
         group.table.forEach((team, idx) => {
-          const raw = team.team?.name || team.team?.shortName || ''
-          positions[`${idx + 1}${letter}`] = ALIASES[raw] || ALIASES[team.team?.shortName] || raw
+          positions[`${idx + 1}${letter}`] = team.team?.name || team.team?.shortName || ''
         })
       }
 
@@ -395,7 +400,6 @@ export default {
     }
 
     // Propagate knockout winners: fetch knockout matches from API and fill "To be announced" slots
-    const stageToRound = { LAST_32: 4, LAST_16: 5, QUARTER_FINALS: 6, SEMI_FINALS: 7, FINAL: 8, THIRD_PLACE: 8 }
     const koResp = await fetch('https://api.football-data.org/v4/competitions/WC/matches?stage=LAST_32,LAST_16,QUARTER_FINALS,SEMI_FINALS,FINAL', {
       headers: { 'X-Auth-Token': env.FOOTBALL_API_KEY }
     })
@@ -408,19 +412,26 @@ export default {
         const away = ALIASES[apiMatch.awayTeam?.shortName] || apiMatch.awayTeam?.shortName
         if (!home || !away) continue
         const apiDate = apiMatch.utcDate?.slice(0, 10)
-        const apiRound = stageToRound[apiMatch.stage] || 0
         const fixture = sched.find(f => {
           if (f.Group || f.RoundNumber < 4) return false
-          if (apiRound && f.RoundNumber !== apiRound) return false
           const fDate = f.DateUtc?.slice(0, 10)
           return fDate === apiDate && (
             (f.HomeTeam === home && f.AwayTeam === away) ||
-            (f.HomeTeam === 'To be announced' || f.AwayTeam === 'To be announced')
+            ((f.HomeTeam === 'To be announced' || f.AwayTeam === 'To be announced') && fDate === apiDate)
           )
         })
         if (!fixture) continue
         if (fixture.HomeTeam === 'To be announced' && home) { fixture.HomeTeam = home; koChanged = true }
         if (fixture.AwayTeam === 'To be announced' && away) { fixture.AwayTeam = away; koChanged = true }
+        // Also fix any name mismatches from earlier resolution
+        if (fixture.HomeTeam !== home && fixture.HomeTeam !== 'To be announced') {
+          const homeRaw = apiMatch.homeTeam?.shortName
+          if (fixture.HomeTeam === homeRaw) { fixture.HomeTeam = home; koChanged = true }
+        }
+        if (fixture.AwayTeam !== away && fixture.AwayTeam !== 'To be announced') {
+          const awayRaw = apiMatch.awayTeam?.shortName
+          if (fixture.AwayTeam === awayRaw) { fixture.AwayTeam = away; koChanged = true }
+        }
       }
       if (koChanged) await env.TOURNEY_KV.put('schedule', JSON.stringify(sched))
     }
